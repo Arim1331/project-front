@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { flexCenter, flexCenterColumn, FONT_STYLE } from "../../styles/common";
 import theme from "../../styles/theme";
+import { Link } from "react-router-dom";
 
 export const LoginScreen = styled.div`
   width : 100%;
@@ -44,41 +45,29 @@ export const KeepLoginContainer = styled.label`
 `
 
 export const KeepLoginCheck = styled.input.attrs({ type: 'checkbox' })`
-  /* 1. 기본 스타일 제거 */
   appearance: none;
   -webkit-appearance: none; /* 사파리 지원 */
-
-  /* 2. 원하는 크기와 배경색 설정 */
   width: 18px;
   height: 18px;
   border: 1px solid ${theme.PALLETE.gray.footerMenu};
   margin: 0px;
-  
-  /* 3. 라디우스 적용 */
   border-radius: 20%;
-  
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-
   &:active {
     filter: brightness(1.1);
   } 
-
-  /* 4. 체크되었을 때의 스타일 */
   &:checked + span {
     color: ${theme.PALLETE.primary.main};
     border-color:${theme.PALLETE.primary.main};
     font-weight: bold;
   }
-
   &:checked {
   background-color: ${theme.PALLETE.primary.main};
   border-color:${theme.PALLETE.primary.main};
   }
-
-  /* 5. 체크 표시 (선택사항: 가상 요소로 구현) */
   &:checked::after {
     content: '✔';
     color: white;
@@ -100,26 +89,56 @@ export const LoginButton = styled.button`
 width: calc(100% - 30px);
 height: 60px;
 border-radius:8px;
-${FONT_STYLE.PRETENDARD.H6_SEMIBOLD}
+${FONT_STYLE.PRETENDARD.H6_SEMIBOLD};
 border: 1px solid ${theme.PALLETE.primary.main};
-
-
 cursor: pointer;
-/* 기본 상태: 배경 흰색, 글씨 파란색 */
-  background-color: white;
-  color: ${theme.PALLETE.mainblack};
-
-  /* 마우스를 올렸을 때: 배경 파란색, 글씨 흰색 (반전) */
+  background-color: ${theme.PALLETE.primary.main};
+  color: white;
   &:hover {
-    background-color: ${theme.PALLETE.primary.sub};
-    color: ${theme.PALLETE.mainblack};
+    filter: brightness(0.95);
   }
-
-  /* 클릭하는 순간: 더 진한 파란색 */
   &:active {
-    background-color: ${theme.PALLETE.primary.main};
-    border-color: ${theme.PALLETE.primary.main};
-    color: white;
+    filter: brightness(0.85);
   }
+`
 
+export const FindAndJoinContainer = styled.div`
+width:clac(100%-30px);
+margin:15px;
+gap: 15px;
+${flexCenter};
+${FONT_STYLE.PRETENDARD.H7_LIGHT};
+color:${theme.PALLETE.gray.footerSub};
+`
+export const StyledJoinLink = styled(Link)`
+${FONT_STYLE.PRETENDARD.H7_REGULAR};
+color:${theme.PALLETE.gray.footerSub};
+`
+
+export const StyledLoginFieldset = styled.fieldset`
+width: calc(100% - 30px);
+border-top:1px solid ${theme.PALLETE.gray[300]};
+${flexCenter};
+`
+
+export const QuickContainer = styled.div`
+width : calc(100% -30px);
+${flexCenter}
+`
+
+export const LoginLegend = styled.legend`
+color : ${theme.PALLETE.gray[300]}
+`
+
+export const QuickIconBox = styled.div`
+${flexCenter}
+gap: 20px;
+margin:20px
+`
+export const QuickIconImg = styled.img`
+width : 56px;
+cursor: pointer;
+&: hover {
+  filter:brightness(0.9);
+}
 `
