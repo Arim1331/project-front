@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { Container, FullDivider, Page } from './style';
-import { CommunityHeader } from './components/CommunityHeader';
-import TrendingCarousel from './components/TrendingCarousel';
-import FeedGrid from './components/FeedGrid';
+import { CommunityHeader } from '../../components/communitycomponents/CommunityHeader';
+import TrendingCarousel from '../../components/communitycomponents/TrendingCarousel';
+import FeedGrid from '../../components/communitycomponents/FeedGrid';
 
 const CommunityMain = () => {
   return (
