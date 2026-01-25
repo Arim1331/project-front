@@ -1,5 +1,8 @@
 import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as S from "../../pages/community/style";
+import PostCard from "./PostCard";
+
+// 슬라이드 전용
 
 const GAP = 22; // 카드 사이 간격(피그마상 40px, 넘 넓어보여서 줄임)
 const VISIBLE = 4; // 화면에 보이는 카드 수(사진 4장)
@@ -24,8 +27,8 @@ const TrendingCarousel = () => {
 
     const update = () => {
       const viewportWidth = el.getBoundingClientRect().width;
-      const w = (viewportWidth - GAP * (VISIBLE - 1)) / VISIBLE;
-      setCardW(w);
+      const width = (viewportWidth - GAP * (VISIBLE - 1)) / VISIBLE;
+      setCardW(width);
     };
 
     update();
@@ -64,7 +67,7 @@ const TrendingCarousel = () => {
           $direction="prev"
           onClick={handlePrev}
           disabled={currentIndex === 0}
-        ></S.CarouselNavButton>
+        />
 
         {/* 슬라이더 영역 */}
         <S.CarouselViewport ref={viewportRef}>
@@ -73,59 +76,12 @@ const TrendingCarousel = () => {
             style={{ transform: `translateX(-${currentIndex * step}px)` }}
           >
             {items.map((item) => (
-              <S.CarouselCard key={item.id} type="button" $w={cardW}>
-                <S.CardImageArea
-                  src="/assets/images/oatmeal.png"
-                  alt="딸기오트밀 이미지"
+              <PostCard
+                key={item.id}
+                item={item}
+                w={cardW}
+                onClick={() => console.log("post click", item.id)}
                 />
-                <S.CardContentArea>
-                  <S.CardTitleRow>
-                    <S.CardTitleLeft>
-                      <S.ProfileImg
-                        src="/assets/images/pinggu.png" // 임시(나중에 item.userProfile로)
-                        alt="유저 프로필"
-                      />
-                      <S.CardTitle>김치찌개</S.CardTitle>
-                    </S.CardTitleLeft>
-
-                    <S.CardLikeArea>
-                      <S.HeartIcon aria-hidden />
-                      <S.LikeCount>24</S.LikeCount>
-                    </S.CardLikeArea>
-                  </S.CardTitleRow>
-
-                  {/* 타이틀/메타 사이 분리선 */}
-                  <S.CardDivider />
-
-                  <S.CardMetaRow>
-                    <S.MetaLeft>
-                      <S.UserNickName>굴곡밥러버</S.UserNickName>
-                    </S.MetaLeft>
-
-                    <S.MetaCenter>
-                      <S.BadgeChip>
-                        <S.BadgeChipIcon
-                          src="/assets/icons/star.png"
-                          alt="별 아이콘"
-                        />
-                        Lv.4
-                      </S.BadgeChip>
-
-                      <S.BadgeChip2>XP 150</S.BadgeChip2>
-                    </S.MetaCenter>
-
-                    <S.MetaRight>
-                      <S.CardDateText>3일 전</S.CardDateText>
-                    </S.MetaRight>
-                  </S.CardMetaRow>
-
-                  <S.CardDesc>
-                    매생이 향이 진해서 국을 뜨자마자 바다 향이 확 올라와요. 굴도
-                    비린 맛 하나 없이 신선해서 씹을 때마다 탱글한 식감이
-                    느껴졌어요.
-                  </S.CardDesc>
-                </S.CardContentArea>
-              </S.CarouselCard>
             ))}
           </S.CarouselTrack>
         </S.CarouselViewport>
@@ -137,7 +93,7 @@ const TrendingCarousel = () => {
           $direction="next"
           onClick={handleNext}
           disabled={currentIndex === maxIndex}
-        ></S.CarouselNavButton>
+        />
       </S.CaroselBody>
     </S.CarouselSection>
   );

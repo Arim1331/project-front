@@ -274,7 +274,8 @@ export const CarouselNavButton = styled.button`
 
 // 카드 뼈대
 export const CarouselCard = styled.button`
-  width: ${({ $w }) => ($w ? `${$w}px` : "280px")};
+  width: ${({ $w }) => ($w ? (typeof $w === "number" ? `${$w}px` : $w) : "100%")};
+
   flex: 0 0 auto;
 
   border: 1px solid ${({ theme }) => theme.PALLETE.gray[200]};
@@ -285,6 +286,14 @@ export const CarouselCard = styled.button`
   overflow: hidden;
   text-align: left;
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+
+  &:hover img {
+  transform: scale(1.03);
+  }
+
+  img {
+    transition: transform 0.25s ease;
+  }
 `
 
 // 이미지 영역 placeholder
@@ -340,10 +349,17 @@ export const HeartIcon = styled.span`
   height: 15px;
   display: inline-block;
   
-  background-image: url("/assets/icons/red_heart.png");
+  background-image: ${({ $liked }) =>
+    $liked
+      ? "url('/assets/icons/red_heart.png')"
+      : "url('/assets/icons/empty_heart.png')"};
+
+
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
+
+  cursor: pointer;
 
 `
 
@@ -443,4 +459,66 @@ export const CardDesc = styled.p`
   overflow: hidden; 
 `
 
-// export const BadgeChip = styled.
+// export const BadgeChip = styled.\
+
+
+// 트렌딩 크러셀 ↔ 피드 그리드 구분선
+export const SectionDivider = styled.div`
+  width: 100%;
+  height: 1px;
+  margin: 60px 0 80px 0;
+
+  background-color: ${({ theme }) => theme.PALLETE.gray[200]};
+  
+`
+
+// ** FeedGrid 부분
+// ✅ 피드 그리드(파란 박스)
+export const FeedGridSection = styled.section`
+  width: 100%;
+  margin-top: 52px; /* 캐러셀 아래 간격 */
+  padding-bottom: 24px;
+`;
+
+export const FeedGridWrap = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 30px; // 트랜딩 크러셀 카드에선 20px
+  /* column-gap: 22px;   좌우 */
+  /* row-gap: 44px;      상하 */
+
+  /* 3열 */
+  @media (max-width: 1320px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* 2열 */
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* 1열 */
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+
+  
+`;
+
+export const FeedGridSentinel = styled.div`
+  height: 1px;
+`;
+
+export const FeedGridLoading = styled.p`
+  margin-top: 18px;
+  text-align: center;
+  ${FONT_STYLE.PRETENDARD.H7_REGULAR};
+  color: ${({ theme }) => theme.PALLETE.gray[700]};
+`;
+
+export const FeedGridEnd = styled.p`
+  margin-top: 18px;
+  text-align: center;
+  ${FONT_STYLE.PRETENDARD.H7_REGULAR};
+  color: ${({ theme }) => theme.PALLETE.gray[700]};
+`;

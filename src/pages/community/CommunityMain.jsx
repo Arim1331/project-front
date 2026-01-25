@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { Container, FullDivider, Page } from './style';
+import { Container, FullDivider, Page, SectionDivider } from './style';
 import { CommunityHeader } from '../../components/communitycomponents/CommunityHeader';
 import TrendingCarousel from '../../components/communitycomponents/TrendingCarousel';
 import FeedGrid from '../../components/communitycomponents/FeedGrid';
@@ -14,10 +14,13 @@ const CommunityMain = () => {
         <CommunityHeader/>
       </Container>
 
-      <FullDivider />
+      <FullDivider />  
 
       <Container>
         <TrendingCarousel/>
+
+        <SectionDivider />
+
         <FeedGrid/>
         {/* <Link to={"post/:postId"}>게시물</Link> */}
       </Container>
