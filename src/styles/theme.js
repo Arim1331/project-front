@@ -9,6 +9,7 @@ const theme = {
     secondary: "#018264",
     white: "#ffffff",
     gray: {
+       50: "#fafafa",
       100: "#f2f2f2",
       200: "#e6e6e6",
       300: "#d9d9d9",
@@ -27,7 +28,7 @@ const theme = {
       gray: "#f2f2f2"
     },
     mainblack: "#000000",
-    hederandfooter : "#262626"
+    headerandfooter : "#262626"
   },
 
   // 2. 폰트 사이즈: h1부터 h8까지 정의
@@ -71,7 +72,63 @@ const theme = {
     h6: "30px",
     h7: "24px",
     h8: "18px",
-  }
+  },
+
+  // 5. Border Radius: 버튼, 카드, 모달 라운드 값 통일
+  RADIUS: {
+    sm: "6px",
+    md: "10px",
+    lg: "16px",
+    xl: "24px",
+    full: "9999px",
+  },
+
+  // 6. 간격 시스템(Spacing): 4px 단위 기반 여백 규칙 정의 (margin / padding / gap 통일)
+  SPACING: {
+    // 기준 단위 (Design Base Unit)
+    unit: 4,
+
+    // Numeric scale (4px 기반 디자인 시스템용)
+    0: "0px",
+    1: "4px",
+    2: "8px",
+    3: "12px",
+    4: "16px",
+    5: "20px",
+    6: "24px",
+    7: "28px",
+    8: "32px",
+    9: "36px",
+    10: "40px",
+    11: "44px",
+    12: "48px",
+    13: "52px",
+    14: "56px",
+    15: "60px",
+    16: "64px",
+    18: "72px",
+    20: "80px",
+    24: "96px",
+    30: "120px",
+
+    // Decimal scale (10px 단위 직관용)
+    px10: "10px",
+    px20: "20px",
+    px30: "30px",
+
+    // Semantic spacing (컴포넌트 의미 기반)
+    xs: "4px",    // 아이콘/텍스트 최소 간격
+    sm: "8px",    // 텍스트 그룹 간격
+    md: "16px",   // 기본 패딩
+    lg: "24px",   // 카드 내부 패딩
+    xl: "32px",   // 섹션 내부 여백
+    xxl: "48px",  // 섹션 구분 여백
+
+    // Layout spacing (페이지 레이아웃 기준)
+    section: "80px",     // 섹션 상/하 기본 여백
+    container: "120px", // PC 기준 좌/우 레이아웃 패딩
+  },
+
 };
 
 export default theme;
