@@ -1,7 +1,7 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { FONT_STYLE } from "../../styles/common";
 
-/* ===== 메인 히어로 ===== */
+/* ===== MainHero Section ===== */
 
 export const HeroWrapper = styled.section`
   position: relative;
@@ -27,7 +27,7 @@ export const HeroSlide = styled.div`
   background-size: cover;
   background-position: center;
 
-  &::before {
+  /* &::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -37,7 +37,7 @@ export const HeroSlide = styled.div`
       rgba(0, 0, 0, 0.35) 35%,
       rgba(0, 0, 0, 0) 70%
     );
-  }
+  } */
 `;
 
 export const HeroContent = styled.div`
@@ -92,9 +92,8 @@ export const HeroButton = styled.button`
   }
 `;
 
-/* title/desc/button은 너가 쓰던 것에 맞춰 유지 가능 */
 
-/* ===== ✅ 시안 컨트롤바 ===== */
+/* ===== 컨트롤바 ===== */
 export const HeroControlBar = styled.div`
   position: absolute;
   left: 120px;
@@ -157,7 +156,7 @@ export const ControlBtn = styled.button`
     left: 15px;
   }
 
-  /* ✅ 재생 상태(is-play)면 pause 막대 숨기고 play 삼각형 표시 */
+  /* 재생 상태(is-play)면 pause 막대 숨기고 play 삼각형 표시 */
   &.pause.is-play::before,
   &.pause.is-play::after {
     display: none;
@@ -221,7 +220,7 @@ export const HeroArrowButton = styled.button`
   }
 `;
 
-/* ===== How It Works Section ===== */
+/* ===== MainHowItWorks Section ===== */
 
 export const HowWrapper = styled.section`
   display: flex;
@@ -264,7 +263,6 @@ export const CardGrid = styled.div`
 `;
 
 export const StepCard = styled.div`
-  background: ${({ theme }) => theme.PALLETE.gray[100]};
   background: ${({ theme })=> theme.PALLETE.gray[50]};
   border-radius: 16px;
   padding: 30px;
@@ -273,7 +271,27 @@ export const StepCard = styled.div`
 
 export const StepIcon = styled.div`
   font-size: 28px;
-  margin-bottom: 12px;
+  margin: 0 5px 12px 0;
+`;
+
+const iconBounce = keyframes`
+  0% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-8px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+`;
+
+export const WorksIconImg = styled.img`
+  &:hover {
+    animation: ${iconBounce} 0.5s ease;
+  }
 `;
 
 export const StepTitle = styled.h4`
@@ -300,3 +318,4 @@ export const StepPoint = styled.strong`
 
 export const StepTextArea = styled.div`
 `;
+

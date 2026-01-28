@@ -11,6 +11,7 @@ import {
   StepTitle,
   StepDesc,
   StepIcon,
+  WorksIconImg,
   StepPoint,
 
 } from "../../pages/main/style";
@@ -31,7 +32,12 @@ const MainHowItWorks = () => {
       <RightArea>
         <CardGrid>
           <StepCard>
-            <StepIcon>❤️</StepIcon>
+            <StepIcon>
+              <WorksIconImg 
+                src={`${process.env.PUBLIC_URL}/assets/images/main/ico_work01.png`}
+                alt="재료 담기"
+              />
+            </StepIcon>
             <StepTextArea>
               <StepTitle>1. 재료 담기</StepTitle>
               <StepDesc>
@@ -42,7 +48,12 @@ const MainHowItWorks = () => {
           </StepCard>
 
           <StepCard>
-            <StepIcon>📱</StepIcon>
+            <StepIcon>
+              <WorksIconImg 
+                src={`${process.env.PUBLIC_URL}/assets/images/main/ico_work02.png`}
+                alt="요리 추천"
+              />
+            </StepIcon>
             <StepTextArea>
               <StepTitle>2. 요리 추천</StepTitle>
               <StepDesc>
@@ -53,7 +64,12 @@ const MainHowItWorks = () => {
           </StepCard>
 
           <StepCard>
-            <StepIcon>🧭</StepIcon>
+            <StepIcon>
+              <WorksIconImg 
+                src={`${process.env.PUBLIC_URL}/assets/images/main/ico_work03.png`}
+                alt="요리 인증"
+              />
+            </StepIcon>
             <StepTextArea>
               <StepTitle>3. 요리 인증</StepTitle>
               <StepDesc>
@@ -64,7 +80,12 @@ const MainHowItWorks = () => {
           </StepCard>
 
           <StepCard>
-            <StepIcon>🏆</StepIcon>
+            <StepIcon>
+              <WorksIconImg 
+                src={`${process.env.PUBLIC_URL}/assets/images/main/ico_work04.png`}
+                alt="레벨 및 뱃지 획득"
+              />
+            </StepIcon>
             <StepTextArea>
               <StepTitle>4. 레벨 및 뱃지 획득</StepTitle>
               <StepDesc>
