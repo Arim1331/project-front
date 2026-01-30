@@ -13,7 +13,6 @@ export const HeroWrapper = styled.section`
   .swiper-wrapper,
   .swiper-slide {
     height: 600px;
-    background-color: red;
   }
 `;
 
@@ -23,14 +22,57 @@ export const HeroSlide = styled.div`
   height: 600px;
   display: flex;
   align-items: center;
+  overflow: hidden;
+  background: #fff;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2; /* 이미지 위 */
+    pointer-events: none;
+    background: linear-gradient(
+      to right,
+      rgba(0,0,0,0.18) 0%,
+      rgba(0,0,0,0.00) 20%,
+      rgba(0,0,0,0.00) 80%,
+      rgba(0,0,0,0.18) 100%
+    );
+  }
+`;
+
+// 1) 뒤에 깔리는 블러 배경
+export const HeroBlurBg = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 0;
 
   background-image: url(${({ $bg }) => $bg});
   background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  filter: blur(28px);
+  transform: scale(1.12);
+  opacity: 0.55;
+`;
+
+export const HeroImage = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: url(${({ $bg }) => $bg});
+  background-size: cover;
+  background-repeat: no-repeat;
   background-position: center;
 `;
 
+
 export const HeroContent = styled.div`
   position: relative;
+  
+  z-index: 2; /* 중요 */
+
   margin-left: clamp(20px, 13vw, 380px);
   max-width: 560px;
   color: ${({ theme }) => theme.PALLETE.white};
@@ -209,7 +251,7 @@ export const HowWrapper = styled.section`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 100px 0;
+  padding: 140px 0;
   background: ${({ theme }) => theme.PALLETE.white};
   width: 1420px;
   margin: 0 auto;
@@ -306,8 +348,12 @@ export const StepTextArea = styled.div`
 
 export const RecipeWrapper = styled.section`
   width: 100%;
-  padding: 34px 0 80px;
   background: ${({ theme }) => theme.PALLETE.white};
+
+  & + & {
+    margin-top: 90px;
+  }
+
 `;
 
 export const RecipeInner = styled.div`
@@ -320,7 +366,7 @@ export const RecipeTitle = styled.h2`
   color: ${({ theme }) => theme.PALLETE.mainblack};
   font-size: 26px;
   line-height: 1;
-  margin-bottom: 16px;
+  margin-bottom: 30px;
 `;
 
 export const RecipeTabs = styled.div`
@@ -335,10 +381,10 @@ export const RecipeTab = styled.button`
   cursor: pointer;
   padding: 9px 14px;
   border-radius: 999px;
-  background: ${({ theme }) => theme.PALLETE.gray[50]};
+  background: ${({ theme }) => theme.PALLETE.gray[100]};
   color: ${({ theme }) => theme.PALLETE.mainblack};
-  font-weight: ${({ theme }) => theme.FONT_WEIGHT?.PRETENDARD?.BOLD || 700};
-  font-size: 14px;
+  font-weight: ${({ theme })=> theme.FONT_WEIGHT.PRETENDARD.MEDIUM};
+  font-size: ${({ theme })=> theme.FONT_SIZE.h7};
   line-height: 1;
 
   &.is-active {
@@ -348,15 +394,15 @@ export const RecipeTab = styled.button`
 `;
 
 export const RecipePanel = styled.div`
-  position: relative;
+  /* position: relative;
 
   .swiper {
     padding: 8px 0 16px;
   }
   .swiper-slide {
     height: auto;
-    width: 260px !important;   /* 카드 한장의 실제 폭 */
-  }
+    width: 260px !important;
+  } */
 `;
 
 export const RecipeCard = styled.div`
@@ -364,12 +410,7 @@ export const RecipeCard = styled.div`
   border-radius: 16px;
   overflow: hidden;
   background: ${({ theme }) => theme.PALLETE.white};
-  /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); */
   cursor: pointer;
-
-  &:hover {
-    /* box-shadow: 0 14px 38px rgba(0, 0, 0, 0.12); */
-  }
 `;
 
 export const RecipeThumb = styled.div`
@@ -388,7 +429,7 @@ export const RecipeThumb = styled.div`
 `;
 
 export const RecipeBody = styled.div`
-  padding: 12px 12px 14px;
+  padding: 15px 0px 15px;
 `;
 
 export const RecipeName = styled.div`
@@ -396,18 +437,19 @@ export const RecipeName = styled.div`
   color: ${({ theme }) => theme.PALLETE.mainblack};
   font-size: ${({ theme }) => theme.FONT_SIZE.h6};
   font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.BOLD};
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `;
 
+
 export const BadgeRow = styled.div`
   display: flex;
   gap: 14px;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 `;
 
 
@@ -440,18 +482,22 @@ export const Badge = styled.span`
 
 export const MetaRow = styled.div`
   display: flex;
-  gap: 14px;
+  width: 100%;
+  justify-content: space-between;
+  gap: 10px;
 `;
 
 export const MetaChip = styled.span`
   ${FONT_STYLE.GIANTS.CAPTION_REGULAR};
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
-  padding: 6px 10px;
-  background: ${({ theme }) => theme.PALLETE.gray[50]};
+  justify-content: center;
+  flex: 1;
+  border-radius: 20px;
+  padding: 12px 13px;
+  background: ${({ theme }) => theme.PALLETE.gray[70]};
   color: ${({ theme }) => theme.PALLETE.gray700};
-  font-size: ${({ theme }) => theme.FONT_SIZE?.h7 || "12px"};
+  font-size: ${({ theme }) => theme.FONT_SIZE.h8};
   font-weight: ${({ theme }) => theme.FONT_WEIGHT?.PRETENDARD?.MEDIUM || 500};
   line-height: 1;
 `;
