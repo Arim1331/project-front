@@ -10,6 +10,7 @@ const theme = {
     white: "#ffffff",
     gray: {
        50: "#fafafa",
+       70: "#F3F3F3",
       100: "#f2f2f2",
       200: "#e6e6e6",
       300: "#d9d9d9",

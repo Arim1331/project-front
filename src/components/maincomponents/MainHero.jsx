@@ -7,6 +7,8 @@ import "swiper/css";
 import {
   HeroWrapper,
   HeroSlide,
+  HeroBlurBg,
+  HeroImage,
   HeroContent,
   HeroTitle,
   HeroDesc,
@@ -154,7 +156,9 @@ const MainHero = () => {
         {slides.map((s) => (
           <SwiperSlide key={s.id}>
             {/* HeroSlide에 bg를 props로 전달 */}
-            <HeroSlide $bg={s.bg}>
+            <HeroSlide>
+              <HeroBlurBg $bg={s.bg} />
+              <HeroImage $bg={s.bg} />
               <HeroContent>
                 <HeroTitle>
                   {s.title.split("\n").map((line, i) => (
