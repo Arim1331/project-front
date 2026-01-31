@@ -98,7 +98,8 @@ const MyRecipeCard = ({ item, onClick, onToggleBookmark }) => {
               width="16"
               height="16"
             />
-            {rating}
+            {Number(rating).toFixed(1)}
+
           </S.Badge>
 
           <S.Badge className="xp">XP {xp}</S.Badge>

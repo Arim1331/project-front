@@ -8,8 +8,9 @@ export const SortTabWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 2px;
+  margin-top: 40px;
+  margin-bottom: 60px;
 `;
 
 export const SortTabButton = styled.button`
@@ -25,6 +26,15 @@ export const SortTabButton = styled.button`
   font-weight: ${({ $active }) => ($active ? 600 : 400)};
 
   transition: color 0.15s ease;
+  position: relative;
+
+  /* 구분자 | */
+  &::after {
+    content: ${({ $isLast }) => ($isLast ? "''" : "'|'")};
+    margin-left: 6px;     /* ← 핵심 */
+    color: ${({ theme }) => theme.PALLETE.gray[300]};
+    font-weight: 400;
+  }
 
   &:hover {
     color: ${({ theme }) => theme.PALLETE.mainblack};
@@ -83,8 +93,8 @@ const pop = keyframes`
 export const ThumbArea = styled.div`
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;       /* 정사각형 */
-  border-radius: 18px;        /* 1번처럼 둥글게 */
+  aspect-ratio: 1 / 1; /* 정사각형 */
+  border-radius: 18px; /* 1번처럼 둥글게 */
   overflow: hidden;
 `;
 
@@ -107,7 +117,9 @@ export const BookmarkIcon = styled.img`
   cursor: pointer;
   z-index: 2;
 
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
   transform-origin: center;
 
   &:hover {
@@ -177,7 +189,7 @@ export const Badge = styled.span`
   padding: 8px 12px;
   border-radius: 10px;
   /* font-weight: 600; */
-  font-weight:  ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.SEMIBOLD};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.SEMIBOLD};
 
   &.star {
     background: ${({ theme }) => theme.PALLETE.primary.sub};
