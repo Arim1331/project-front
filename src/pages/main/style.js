@@ -501,3 +501,170 @@ export const MetaChip = styled.span`
   font-weight: ${({ theme }) => theme.FONT_WEIGHT?.PRETENDARD?.MEDIUM || 500};
   line-height: 1;
 `;
+
+
+/* ===== Main Live Review Section ===== */
+
+export const LiveReviewWrapper = styled.section`
+  width: 100%;
+  background: ${({ theme }) => theme.PALLETE.white};
+  margin-top: 90px;
+`;
+
+export const LiveReviewInner = styled.div`
+  width: 1420px;
+  margin: 0 auto;
+`;
+
+export const LiveReviewHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 28px;
+`;
+
+export const LiveReviewTitleBox = styled.div``;
+
+export const LiveReviewSubTitle = styled.p`
+  ${FONT_STYLE.GIANTS.CAPTION_REGULAR};
+  color: ${({ theme }) => theme.PALLETE.primary.main};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.BOLD};
+  margin-bottom: 8px;
+`;
+
+export const LiveReviewTitle = styled.h2`
+  ${FONT_STYLE.GIANTS.H3_BOLD};
+  color: ${({ theme }) => theme.PALLETE.mainblack};
+  font-size: 30px;
+  line-height: 1;
+  margin-bottom: 30px;
+`;
+
+export const LiveReviewMoreButton = styled.button`
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  ${FONT_STYLE.GIANTS.CAPTION_REGULAR};
+  color: ${({ theme }) => theme.PALLETE.gray600};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.SEMIBOLD};
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+export const LiveReviewGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+`;
+
+export const LiveReviewCard = styled.div`
+  background: ${({ theme }) => theme.PALLETE.white};
+  border-radius: 16px;
+  padding: 22px;
+  border: 1px solid ${({ theme }) => theme.PALLETE.gray[70]};
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+
+
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  &.has-images {
+    min-height: 390px;
+  }
+
+`;
+
+export const LiveReviewCardTop = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
+export const LiveReviewMetaLeft = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+export const LiveReviewAvatar = styled.div`
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.PALLETE.gray[100]};
+`;
+
+export const LiveReviewRecipeTitle = styled.p`
+  ${FONT_STYLE.GIANTS.BODY1_BOLD};
+  font-size: ${({ theme }) => theme.FONT_SIZE.h7};
+  margin-bottom: 10px;
+`;
+
+export const LiveReviewBadgeRow = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+export const LiveReviewBadge = styled.span`
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.SEMIBOLD};
+
+  &.star {
+    background: #ffefe6;
+    color: ${({ theme }) => theme.PALLETE.primary.main};
+  }
+
+  &.xp {
+    background: #e7faf2;
+    color: #017a5a;
+  }
+`;
+
+export const LiveReviewArrowBtn = styled.button`
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid ${({ theme }) => theme.PALLETE.gray[100]};
+  background: white;
+  cursor: pointer;
+`;
+
+export const LiveReviewDivider = styled.div`
+  height: 1px;
+  background: ${({ theme }) => theme.PALLETE.gray[70]};
+  margin: 16px 0;
+`;
+
+export const LiveReviewUserName = styled.p`
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.BOLD};
+  margin-bottom: 8px;
+`;
+
+export const LiveReviewContent = styled.p`
+  color: ${({ theme }) => theme.PALLETE.gray700};
+  line-height: 1.6;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
+
+export const LiveReviewImageRow = styled.div`
+  margin-top: auto;
+  padding-top: 14px;
+  display: grid;
+  gap: 10px;
+
+  &.count-1 { grid-template-columns: 1fr; }
+  &.count-2 { grid-template-columns: repeat(2, 1fr); }
+  &.count-3 { grid-template-columns: repeat(3, 1fr); }
+`;
+
+export const LiveReviewThumb = styled.div`
+  height: 58px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: ${({ theme }) => theme.PALLETE.gray[50]};
+`;
