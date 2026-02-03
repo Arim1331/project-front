@@ -1,0 +1,122 @@
+import styled from "styled-components";
+import { flexCenter, FONT_STYLE } from "../../../styles/common";
+
+export const Backdrop = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  background: rgba(0, 0, 0, 0.35);
+  ${flexCenter}
+`;
+
+export const Modal = styled.div`
+  width: 100%;
+  max-width: 500px;
+
+  background: ${({ theme }) => theme.PALLETE.white};
+  border-radius: 20px;
+
+  padding: 36px 28px 28px;
+  text-align: center;
+
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+`;
+
+export const IconWrapper = styled.div`
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 18px;
+
+  ${flexCenter}
+`;
+
+export const Icon = styled.img`
+  width: 127px;
+  height: auto;
+`;
+
+export const Title = styled.h2`
+  ${FONT_STYLE.PRETENDARD.H5_BOLD};
+  color: ${({ theme }) => theme.PALLETE.mainblack};
+  margin-bottom: 10px;
+`;
+
+export const Desc = styled.p`
+  ${FONT_STYLE.PRETENDARD.H7_REGULAR};
+  color: ${({ theme }) => theme.PALLETE.gray[700]};
+  line-height: 1.5;
+  margin-bottom: 24px;
+`;
+
+export const Divider = styled.div`
+  height: 1px;
+  background: ${({ theme }) => theme.PALLETE.gray[200]};
+  margin-bottom: 34px;
+`;
+
+export const ButtonRow = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 10px;
+
+`;
+
+export const CancelButton = styled.button`
+  height: 48px;
+  width: 140px;
+  border-radius: 5px;
+
+  border: 1px solid ${({ theme }) => theme.PALLETE.gray.footerSub};
+  background: ${({ theme }) => theme.PALLETE.white};
+
+  ${FONT_STYLE.PRETENDARD.H7_REGULAR};
+  color: ${({ theme }) => theme.PALLETE.headerandfooter};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.MEDIUM};
+
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.PALLETE.gray[200]};
+  }
+
+  &:active {
+    background: ${({ theme }) => theme.PALLETE.gray[900]};
+    color: ${({ theme }) => theme.PALLETE.white};
+
+  }
+`;
+
+export const ConfirmButton = styled.button`
+  height: 48px;
+  width: 140px;
+  border-radius: 5px;
+
+  border: 1px solid #ff4e37;
+
+  background: ${({ theme }) => theme.PALLETE.white};
+  color: ${({ theme }) => theme.PALLETE.primary.mainblack};
+
+  ${FONT_STYLE.PRETENDARD.H7_REGULAR};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.MEDIUM};
+
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.PALLETE.primary.sub};
+    color: ${({ theme }) => theme.PALLETE.mainblack};
+  }
+
+  &:active{
+    background: ${({ theme }) => theme.PALLETE.primary.main};
+    color: ${({ theme }) => theme.PALLETE.white};
+    transform: translateY(-2px);
+
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.PALLETE.primary.main};
+    outline-offset: 4px;
+  }
+`;

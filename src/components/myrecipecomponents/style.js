@@ -230,3 +230,74 @@ export const MetaChip = styled.span`
   border-radius: 999px;
   white-space: nowrap;
 `;
+
+
+/** ---------------------------
+ * MyRecipeEmpty (빈 화면)
+ * --------------------------- */
+
+export const MyRecipeEmptyWrapper = styled.div`
+  min-height: calc(100vh - 260px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+`;
+
+export const MyRecipeEmptyImage = styled.img`
+  width: 400px;
+  height: auto;
+  margin-bottom: 24px;
+`;
+
+export const MyRecipeEmptyTitle = styled.h2`
+  ${FONT_STYLE.GIANTS.H5_REGULAR};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.SEMIBOLD};
+  color: ${({ theme }) => theme.PALLETE.mainblack};
+  margin-bottom: 8px;
+`;
+
+export const MyRecipeEmptyDesc = styled.p`
+  ${FONT_STYLE.PRETENDARD.H7_REGULAR};
+  color: ${({ theme }) => theme.PALLETE.gray[700]};
+`;
+
+
+/** ---------------------------
+ * MyRecipeEmpty CTA Button
+ * --------------------------- */
+
+export const MyRecipeEmptyButton = styled.button`
+  margin-top: 32px;
+  padding: 10px 28px;
+  border-radius: 5px;
+
+  border: 1px solid #ff4e37;
+  cursor: pointer;
+
+  ${FONT_STYLE.PRETENDARD.H7_REGULAR};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.MEDIUM};
+
+  background: ${({ theme }) => theme.PALLETE.white};
+  color: ${({ theme }) => theme.PALLETE.primary.mainblack};
+
+  /* transition:
+    background-color 0.15s ease,
+    transform 0.15s ease; */
+
+  &:hover {
+    background: ${({ theme }) => theme.PALLETE.primary.sub};
+    color: ${({ theme }) => theme.PALLETE.mainblack};
+    /* transform: translateY(-2px); */
+  }
+
+  &:active{
+    background: ${({ theme }) => theme.PALLETE.primary.main};
+    color: ${({ theme }) => theme.PALLETE.white};
+    transform: translateY(-2px);
+
+  }
+
+
+`;
