@@ -1,6 +1,9 @@
 import React from "react";
 import ReportChallengeHero from "../../components/reportchallengecomponents/ReportChallengeHero";
 import ChallengeList from "../../components/reportchallengecomponents/ChallengeList";
+import MaterialUsageTrend from "../../components/reportchallengecomponents/MaterialUsageTrend";
+import WeeklyChallengeCard from "../../components/reportchallengecomponents/WeeklyChallengeCard";
+import CookingProofSwiper from "../../components/reportchallengecomponents/CookingProofSwiper";
 import ChallengeCompleteModal from "../../components/reportchallengecomponents/ChallengeCompleteModal";
 
 const ReportAndChallenge = () => {
@@ -18,6 +21,9 @@ const ReportAndChallenge = () => {
       />
 
       <ChallengeList />
+      <MaterialUsageTrend />
+      <WeeklyChallengeCard />
+      <CookingProofSwiper />
       <ChallengeCompleteModal />
     </div>
   );

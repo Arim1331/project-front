@@ -1,6 +1,6 @@
 import styled, { keyframes } from "styled-components";
 import { FONT_STYLE } from "../../styles/common";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Swiper } from "swiper/react";
 
 /* ===== MainHero Section ===== */
 
@@ -30,7 +30,7 @@ export const HeroSlide = styled.div`
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 2; /* 이미지 위 */
+    z-index: 2;
     pointer-events: none;
     background: linear-gradient(
       to right,
@@ -71,9 +71,7 @@ export const HeroImage = styled.div`
 
 export const HeroContent = styled.div`
   position: relative;
-  
-  z-index: 2; /* 중요 */
-
+  z-index: 2;
   margin-left: clamp(20px, 13vw, 380px);
   max-width: 560px;
   color: ${({ theme }) => theme.PALLETE.white};
@@ -99,7 +97,6 @@ export const HeroButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 14px;
-
   height: 40px;
   padding: 0 18px;
   border-radius: ${({ theme }) => theme.RADIUS.sm};
@@ -147,7 +144,7 @@ export const ControlBtn = styled.button`
   cursor: pointer;
   color: rgba(255, 255, 255, 0.95);
 
-  /* 오른쪽 > 버튼 (시안처럼) */
+  /* 오른쪽 > 버튼 */
   &.next {
     font-size: 28px;
     line-height: 1;
@@ -221,7 +218,6 @@ export const HeroArrowButton = styled.button`
   top: 50%;
   transform: translateY(-50%);
   z-index: 40;
-
   border: 0;
   background: transparent;
   padding: 0;
@@ -602,23 +598,17 @@ export const LiveReviewMetaLeft = styled.div`
   gap: 10px;
 `;
 
-/* export const LiveReviewAvatar = styled.div`
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: ${({ theme }) => theme.PALLETE.gray[100]};
-`; */
 export const LiveReviewAvatar = styled.div`
   width: 38px;
   height: 38px;
   border-radius: 50%;
   background: ${({ theme }) => theme.PALLETE.gray[100]};
-  overflow: hidden; /* 원형 마스크 */
+  overflow: hidden;
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* 안 찌그러짐 */
+    object-fit: cover;
     display: block;
   }
 `;
