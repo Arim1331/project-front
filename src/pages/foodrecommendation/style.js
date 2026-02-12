@@ -184,4 +184,234 @@ S.DropdownItem = styled.button`
 `;
 
 
+
+
+
+
+
+
+
+/* ===================================================
+   FoodComplete 전용
+=================================================== */
+
+S.FCPage = styled.main`
+  width: 100%;
+  min-height: 100vh;
+  background: #f3f3f3;
+`;
+
+S.FCWrapper = styled.div`
+  max-width: 1420px;
+  margin: 0 auto;
+  padding-bottom: 120px;
+`;
+
+/* ================= Hero ================= */
+
+S.FCHero = styled.section`
+  width: 100%;
+  height: 360px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 60px;
+`;
+
+S.FCHeroImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+S.FCHeroOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+`;
+
+S.FCHeroInner = styled.div`
+  max-width: 1420px;
+  margin: 0 auto;
+  padding: 0 20px;
+`;
+
+S.FCTitle = styled.h1`
+  ${FONT_STYLE.GIANTS.H7_REGULAR};
+  font-size: 24px;
+  font-weight: 700;
+`;
+
+S.FCSubText = styled.p`
+  font-size: 13px;
+  margin-top: 8px;
+  color: #444;
+`;
+
+/* ================= Content ================= */
+
+S.FCContent = styled.div`
+  max-width: 1420px;
+  margin: 100px auto 0;
+`;
+
+/* 공통 섹션 */
+S.FCSection = styled.section`
+  margin-bottom: 48px;
+`;
+
+S.FCSectionHeading = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+`;
+
+S.FCSectionTitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+S.FCSectionIcon = styled.img`
+  width: 20px;
+  height: 20px;
+`;
+
+/* ================= Upload ================= */
+
+S.FCUploadBox = styled.div`
+  width: 100%;
+  height: 180px;
+  border: 1px dashed #ccc;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #888;
+`;
+
+/* ================= 후기 ================= */
+
+S.FCTextarea = styled.textarea`
+  width: 100%;
+  height: 140px;
+  border: 1px solid #ddd;
+  background: #fff;
+  padding: 16px;
+  font-size: 14px;
+  resize: none;
+
+  &:focus {
+    outline: none;
+    border-color: #ff4d37;
+  }
+`;
+
+/* ================= 재료 ================= */
+
+S.FCIngredientSectionWrap = styled.div`
+  width: 1420px;
+  margin: 0 auto;
+`;
+
+S.FCIngredientBox = styled.div`
+  width: 1420px;
+  height: 427px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: #fff;
+  padding: 32px 40px;
+  position: relative;
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  column-gap: 60px;
+  row-gap: 18px;
+`;
+
+S.FCIngredientItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+`;
+
+S.FCCheckIcon = styled.img`
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+`;
+
+S.FCSelectedCount = styled.div`
+  position: absolute;
+  bottom: 16px;
+  right: 24px;
+  font-size: 12px;
+  color: #ff4d37;
+`;
+
+/* ================= XP ================= */
+
+S.FCXPBox = styled.div`
+  border: 1px solid #ddd;
+  background: #fff;
+  padding: 24px;
+`;
+
+S.FCXPLabel = styled.div`
+  font-size: 14px;
+  margin: 12px 0;
+`;
+
+S.FCProgressBar = styled.div`
+  width: 100%;
+  height: 10px;
+  background: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+`;
+
+S.FCProgressOrange = styled.div`
+  width: ${({ value }) => value}%;
+  height: 100%;
+  background: #ff7a00;
+`;
+
+S.FCProgressBlue = styled.div`
+  width: ${({ value }) => value}%;
+  height: 100%;
+  background: #2d9cff;
+`;
+
+/* ================= 공유 ================= */
+
+S.FCShareBox = styled.div`
+  border: 1px solid #ddd;
+  background: #fff;
+  padding: 20px;
+  font-size: 13px;
+  color: #666;
+`;
+
+/* ================= 버튼 ================= */
+
+S.FCCompleteButton = styled.button`
+  display: block;
+  margin: 60px auto 0;
+  padding: 12px 44px;
+  border: 1px solid #ff4d37;
+  background: #fff;
+  color: #ff4d37;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background: #ff4d37;
+    color: #fff;
+  }
+`;
+
 export default S;

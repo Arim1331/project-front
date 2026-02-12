@@ -9,7 +9,7 @@ const RecommendRecipe = () => {
   const recipe =
     location.state?.recipe || {
       id: Number(foodId),
-      title: "초간단 계란참치죽",
+      title: "얼큰한 김치찌개",
       desc: "몸을 따뜻하게 해주는 영양만점 계란참치죽\n간단한 재료로 빠르게 만들 수 있어요.",
       rating: 4.8,
       xp: 350,
@@ -91,9 +91,11 @@ const RecommendRecipe = () => {
         </S.StepGrid>
 
         <S.ButtonRow>
+          <Link to="../foodcomplete">
           <S.PrimaryButton>
             요리 완성 <span>›</span>
           </S.PrimaryButton>
+          </Link>
         </S.ButtonRow>
       </S.Container>
     </>
