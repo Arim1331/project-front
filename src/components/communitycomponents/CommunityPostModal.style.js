@@ -1,4 +1,5 @@
-// CommunityPostModal.style.js
+// 변경점: MenuBoxFixed 추가(포탈용), MenuOverlay z-index 상향, MenuBox shadow 수정
+
 import styled from "styled-components";
 import { flexCenter, flexBetweenRow, FONT_STYLE } from "../../styles/common";
 
@@ -47,11 +48,11 @@ export const HeroBg = styled.img`
   height: 100%;
   object-fit: cover;
 
-  transform: scale(1.06); /* blur 테두리 비는 거 방지 */
+  transform: scale(1.06);
   opacity: 0.5;
 `;
 
-/* ✅ 배경 딤(어둡게 + 대비) */
+/* ✅ 배경 딤 */
 export const HeroBgDim = styled.div`
   position: absolute;
   inset: 0;
@@ -67,17 +68,17 @@ export const HeroMain = styled.div`
 
 export const HeroMainBox = styled.div`
   position: absolute;
-  inset: 0; /* 🔥 Hero 영역 전체 확보 */
+  inset: 0;
 `;
 
 /* ✅ 중앙 메인 이미지 */
 export const HeroMainImg = styled.img`
   position: absolute;
-  inset: 0; /* 🔥 박스에 딱 붙이기 */
+  inset: 0;
   width: 100%;
   height: 100%;
 
-  object-fit: contain; /* 안 잘리고 최대 크기 */
+  object-fit: contain;
   display: block;
 
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
@@ -350,21 +351,28 @@ export const XpBox = styled.div`
   }
 `;
 
-/* ---------- comments (✅ 2번 구조) ---------- */
+/* ---------- comments ---------- */
 
 export const CommentCard = styled.div`
   border: 1px solid ${({ theme }) => theme.PALLETE.gray[300]};
   border-radius: 10px;
   background: ${({ theme }) => theme.PALLETE.white};
   padding: 10px 12px;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 `;
 
 export const CommentHeader = styled.div`
   ${FONT_STYLE.PRETENDARD.H7_REGULAR};
   font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.SEMIBOLD};
   color: ${({ theme }) => theme.PALLETE.mainblack};
-  margin-bottom: -5px;
-  ${flexBetweenRow}
+  /* ${flexBetweenRow} */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
 `;
 
 export const CommentHeaderTop = styled.div`
@@ -404,18 +412,18 @@ export const CommentHeaderMenuItem = styled.button`
 
 export const SectionDivider = styled.div`
   border-top: 1px solid ${({ theme }) => theme.PALLETE.gray[200]};
-  margin: 8px -12px; /* 좌우 padding 무시하고 꽉 */
+  margin: 6px -12px 10px
 `;
 
 export const CommentScrollArea = styled.div`
-  /* height: 170px; */
-  height: 188px;
+  flex: 1;
+  min-height: 188px;
   overflow: auto;
 
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-right: 6px; /* 스크롤바 숨통 */
+  padding-right: 6px;
 `;
 
 export const EmptyComment = styled.div`
@@ -471,7 +479,6 @@ export const EditActionRow = styled.div`
 export const EditActionButton = styled.button`
   border: 1px solid ${({ theme }) => theme.PALLETE.gray[300]};
   border-radius: 5px;
-  /* border-radius: 5px; */
   background: transparent;
   cursor: pointer;
   padding: 4px 6px;
@@ -548,7 +555,7 @@ export const KebabButton = styled.button`
   }
 `;
 
-/* ✅ 점3개(아이콘 대신 CSS로 만들기) */
+/* ✅ 점3개 */
 export const KebabDots = styled.div`
   width: 4px;
   height: 4px;
@@ -575,28 +582,28 @@ export const KebabDots = styled.div`
   }
 `;
 
+/* ✅ 포탈 메뉴 뒤 클릭막이(스크롤 영역 밖이라 fixed) */
 export const MenuOverlay = styled.div`
   position: fixed;
   inset: 0;
-  z-index: 99999;
+  z-index: 100000;
 `;
 
-export const MenuBox = styled.div`
-  position: absolute;
-  right: 0;
-  ${({ $direction }) => ($direction === "up" ? "bottom: 34px;" : "top: 34px;")}
-  z-index: 999;
+/* ✅ 포탈 메뉴 박스(스크롤 overflow 영향 X) */
+export const MenuBoxFixed = styled.div`
+  position: fixed;
+  z-index: 100001;
 
   width: 110px;
   background: ${({ theme }) => theme.PALLETE.white};
   border: 1px solid ${({ theme }) => theme.PALLETE.gray[200]};
   border-radius: 10px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
 
   padding: 6px;
 
-  display: flex; /* ✅ 세로 */
-  flex-direction: column; /* ✅ 세로 */
+  display: flex;
+  flex-direction: column;
 `;
 
 /* ✅ 메뉴 아이템 */
@@ -629,11 +636,6 @@ export const MenuItem = styled.button`
       }
     `}
 `;
-
-/* 아이콘도 같이 색 바꾸려면: svg를 img로 쓰면 색 변경이 안 돼서
-   1) svg를 "inline svg 컴포넌트"로 바꾸거나
-   2) 지금처럼 img면 그냥 primary 컬러 아이콘 파일을 따로 쓰는 게 제일 빠름.
-*/
 
 export const MenuIcon = styled.img`
   width: 16px;
@@ -712,7 +714,6 @@ export const CounterText = styled.div`
 
 /* ✅ 취소/저장 버튼 영역 */
 export const ActionRow = styled.div`
-  /* margin-top: 10px; */
   margin-bottom: 10px;
   display: flex;
   justify-content: center;
@@ -743,4 +744,3 @@ export const ActionButton = styled.button`
   opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
   pointer-events: ${({ $disabled }) => ($disabled ? "none" : "auto")};
 `;
-

@@ -398,13 +398,31 @@ export const MetaLeft = styled.div`
 export const UserNickName = styled.p`
   ${FONT_STYLE.PRETENDARD.H7_REGULAR};
   color: ${({ theme }) => theme.PALLETE.mainblack};
-  font-weight: 600; 
+  font-weight: 600;
 
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 
-`
+  ${({ $mine, theme }) =>
+    $mine &&
+    `
+      position: relative;
+      padding-left: 12px;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: ${theme.PALLETE.primary.main};
+      }
+    `}
+`;
 export const MetaCenter = styled.div`
   display: inline-flex;
   align-items: center;

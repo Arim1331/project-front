@@ -1,4 +1,3 @@
-// src/pages/community/CommunityMain.jsx (복붙 전용)
 // ✅ 다른 사람 글 클릭 => CommunityPostModal
 // ✅ 내 글 클릭 => MyPostModal
 import React, { useState, useCallback, useEffect, useMemo } from "react";

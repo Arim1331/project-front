@@ -1,4 +1,6 @@
-// CommunityPostModal.style.js
+// ✅ 변경점: MenuBoxFixed 추가(포탈용), MenuOverlay z-index 올림
+// ✅ 기존 MenuBox는 (게시글 ⋮ / 댓글관리 ⋮)에 계속 사용
+
 import styled from "styled-components";
 import { flexCenter, flexBetweenRow, FONT_STYLE } from "../../styles/common";
 
@@ -39,7 +41,6 @@ export const ImageWrapper = styled.div`
   height: 100%;
 `;
 
-/* ✅ 배경 이미지: cover + blur */
 export const HeroBg = styled.img`
   position: absolute;
   inset: 0;
@@ -47,18 +48,16 @@ export const HeroBg = styled.img`
   height: 100%;
   object-fit: cover;
 
-  transform: scale(1.06); /* blur 테두리 비는 거 방지 */
+  transform: scale(1.06);
   opacity: 0.5;
 `;
 
-/* ✅ 배경 딤(어둡게 + 대비) */
 export const HeroBgDim = styled.div`
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.3);
 `;
 
-/* ✅ 중앙 메인 이미지 컨테이너 */
 export const HeroMain = styled.div`
   position: absolute;
   inset: 0;
@@ -67,17 +66,16 @@ export const HeroMain = styled.div`
 
 export const HeroMainBox = styled.div`
   position: absolute;
-  inset: 0; /* 🔥 Hero 영역 전체 확보 */
+  inset: 0;
 `;
 
-/* ✅ 중앙 메인 이미지 */
 export const HeroMainImg = styled.img`
   position: absolute;
-  inset: 0; /* 🔥 박스에 딱 붙이기 */
+  inset: 0;
   width: 100%;
   height: 100%;
 
-  object-fit: contain; /* 안 잘리고 최대 크기 */
+  object-fit: contain;
   display: block;
 
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
@@ -90,13 +88,6 @@ export const HeroPlaceholder = styled.div`
 
   ${FONT_STYLE.PRETENDARD.H6_REGULAR};
   color: ${({ theme }) => theme.PALLETE.gray[700]};
-`;
-
-export const HeroImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 `;
 
 export const CloseButton = styled.button`
@@ -209,6 +200,25 @@ export const Left = styled.div`
 
 export const Right = styled.div`
   min-width: 0;
+`;
+
+export const TopLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+`;
+
+export const TopRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+`;
+
+export const PostMenuWrap = styled.div`
+  position: relative;
+  flex-shrink: 0;
 `;
 
 export const Nickname = styled.div`
@@ -344,72 +354,88 @@ export const XpBox = styled.div`
   }
 `;
 
-/* ---------- comments (✅ 2번 구조) ---------- */
+/* ---------- comments ---------- */
 
 export const CommentCard = styled.div`
   border: 1px solid ${({ theme }) => theme.PALLETE.gray[300]};
   border-radius: 10px;
   background: ${({ theme }) => theme.PALLETE.white};
   padding: 10px 12px;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
+// ✅ 댓글 헤더 ⋮ 래퍼 (헤더에서만 사용)
+export const CommentHeaderMenuWrap = styled.div`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
 `;
 
 export const CommentHeader = styled.div`
   ${FONT_STYLE.PRETENDARD.H7_REGULAR};
   font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.SEMIBOLD};
   color: ${({ theme }) => theme.PALLETE.mainblack};
-  margin-bottom: -5px;
-  ${flexBetweenRow}
+
+  /* ✅ 3칸 고정 레이아웃 */
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 10px;
+
+  padding: 6px 0;
 `;
 
 export const CommentHeaderTop = styled.div`
+  /* margin-bottom: 6px; */
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 `;
 
-export const CommentHeaderMenu = styled.div`
+export const CommentHeaderLeft = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: 8px;
-
-  padding: 8px;
-  border: 1px solid ${({ theme }) => theme.PALLETE.gray[200]};
-  border-radius: 10px;
-  background: ${({ theme }) => theme.PALLETE.white};
+  min-width: 0;
 `;
 
-export const CommentHeaderMenuItem = styled.button`
-  border: none;
-  background: ${({ theme }) => theme.PALLETE.gray[50]};
-  cursor: pointer;
+// ✅ 헤더 가운데(전체선택)
+export const CommentHeaderCenter = styled.div`
+  /* flex: 1; */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 가운데 칸의 시작쪽에 붙이기 */
+  min-width: 0;
+`;
 
-  padding: 10px 12px;
-  border-radius: 8px;
-  text-align: left;
+export const CommentHeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 
-  ${FONT_STYLE.PRETENDARD.H8_REGULAR};
-  color: ${({ theme }) => theme.PALLETE.mainblack};
-
-  &:hover {
-    background: ${({ theme }) => theme.PALLETE.gray[100]};
-  }
+  justify-content: flex-end;
 `;
 
 export const SectionDivider = styled.div`
   border-top: 1px solid ${({ theme }) => theme.PALLETE.gray[200]};
-  margin: 8px -12px; /* 좌우 padding 무시하고 꽉 */
+  /* margin: 8px -12px; */
+  margin: 8px -12px 10px;
 `;
 
 export const CommentScrollArea = styled.div`
-  /* height: 170px; */
-  height: 188px;
+  flex: 1;
+  min-height: 188px;
   overflow: auto;
 
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-right: 6px; /* 스크롤바 숨통 */
+  padding-right: 6px;
 `;
 
 export const EmptyComment = styled.div`
@@ -465,7 +491,6 @@ export const EditActionRow = styled.div`
 export const EditActionButton = styled.button`
   border: 1px solid ${({ theme }) => theme.PALLETE.gray[300]};
   border-radius: 5px;
-  /* border-radius: 5px; */
   background: transparent;
   cursor: pointer;
   padding: 4px 6px;
@@ -542,10 +567,11 @@ export const KebabButton = styled.button`
   }
 `;
 
-/* ✅ 점3개(아이콘 대신 CSS로 만들기) */
+/* ✅ 점3개 */
 export const KebabDots = styled.div`
-  width: 4px;
-  height: 4px;
+  margin-bottom: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: ${({ theme }) => theme.PALLETE.gray[500]};
   position: relative;
@@ -555,8 +581,8 @@ export const KebabDots = styled.div`
     content: "";
     position: absolute;
     left: 0;
-    width: 4px;
-    height: 4px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: ${({ theme }) => theme.PALLETE.gray[500]};
   }
@@ -569,28 +595,46 @@ export const KebabDots = styled.div`
   }
 `;
 
+/* ✅ 포탈 뒤 클릭막이 */
 export const MenuOverlay = styled.div`
   position: fixed;
   inset: 0;
-  z-index: 99999;
+  z-index: 100000;
 `;
 
-export const MenuBox = styled.div`
-  position: absolute;
-  right: 0;
-  ${({ $direction }) => ($direction === "up" ? "bottom: 34px;" : "top: 34px;")}
-  z-index: 999;
+/* ✅ 포탈 메뉴 박스(댓글 ⋮ 전용) */
+export const MenuBoxFixed = styled.div`
+  position: fixed;
+  z-index: 100001;
 
   width: 110px;
   background: ${({ theme }) => theme.PALLETE.white};
   border: 1px solid ${({ theme }) => theme.PALLETE.gray[200]};
   border-radius: 10px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
 
   padding: 6px;
 
-  display: flex; /* ✅ 세로 */
-  flex-direction: column; /* ✅ 세로 */
+  display: flex;
+  flex-direction: column;
+`;
+
+/* ✅ 기존 MenuBox (게시글 ⋮ / 댓글관리 ⋮ 용) */
+export const MenuBox = styled.div`
+  position: absolute;
+  right: 0;
+  ${({ $direction }) => ($direction === "up" ? "bottom: 34px;" : "top: 34px;")}
+  z-index: 20000;
+
+  width: ${({ $w }) => ($w ? `${$w}px` : "110px")};
+  background: ${({ theme }) => theme.PALLETE.white};
+  border: 1px solid ${({ theme }) => theme.PALLETE.gray[200]};
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
 `;
 
 /* ✅ 메뉴 아이템 */
@@ -606,6 +650,10 @@ export const MenuItem = styled.button`
 
   padding: 10px 10px;
   border-radius: 8px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   ${FONT_STYLE.PRETENDARD.H8_REGULAR};
 
@@ -624,17 +672,65 @@ export const MenuItem = styled.button`
     `}
 `;
 
-/* 아이콘도 같이 색 바꾸려면: svg를 img로 쓰면 색 변경이 안 돼서
-   1) svg를 "inline svg 컴포넌트"로 바꾸거나
-   2) 지금처럼 img면 그냥 primary 컬러 아이콘 파일을 따로 쓰는 게 제일 빠름.
-*/
-
 export const MenuIcon = styled.img`
   width: 16px;
   height: 16px;
   display: block;
 `;
 
+/* ✅ 선택모드: 전체 선택 버튼 */
+export const SelectAllButton = styled.button`
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 3px 6px;
+  border-radius: 8px;
+
+`;
+
+export const SelectAllText = styled.span`
+  ${FONT_STYLE.PRETENDARD.H8_REGULAR};
+  color: ${({ theme }) => theme.PALLETE.gray[800]};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.MEDIUM};
+`;
+
+export const SelectAllIcon = styled.img`
+  width: 18px;
+  height: 18px;
+  display: block;
+`;
+
+/* ✅ 선택모드: 댓글 한 줄 선택 버튼 */
+export const SelectRowButton = styled.button`
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: ${({ theme }) => theme.PALLETE.gray[100]};
+  }
+`;
+
+export const SelectRowIcon = styled.img`
+  width: 18px;
+  height: 18px;
+  display: block;
+`;
+
+/* 입력 영역 */
 export const CommentComposer = styled.div`
   margin-top: 18px;
   display: grid;
@@ -704,9 +800,7 @@ export const CounterText = styled.div`
   color: ${({ theme }) => theme.PALLETE.gray[900]};
 `;
 
-/* ✅ 취소/저장 버튼 영역 */
 export const ActionRow = styled.div`
-  /* margin-top: 10px; */
   margin-bottom: 10px;
   display: flex;
   justify-content: center;
@@ -738,24 +832,7 @@ export const ActionButton = styled.button`
   pointer-events: ${({ $disabled }) => ($disabled ? "none" : "auto")};
 `;
 
-export const TopLeft = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-`;
-
-export const TopRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* ✅ 핵심 */
-  gap: 14px;
-`;
-
-export const PostMenuWrap = styled.div`
-  position: relative;
-  flex-shrink: 0;
-`;
+/* ----- 게시글 편집 UI ----- */
 
 export const EditTitleInput = styled.input`
   width: 100%;
@@ -825,7 +902,7 @@ export const PostEditButton = styled.button`
     $primary
       ? theme.PALLETE.primary.main
       : $danger
-        ? theme.PALLETE.error
+        ? theme.PALLETE.primary.main
         : "transparent"};
 
   color: ${({ theme, $primary, $danger }) =>
@@ -836,7 +913,6 @@ export const PostEditButton = styled.button`
 `;
 
 export const SelectActionBar = styled.div`
-  margin-top: 10px;
   display: flex;
   justify-content: flex-end;
   gap: 8px;

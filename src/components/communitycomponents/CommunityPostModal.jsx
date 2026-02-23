@@ -1,3 +1,6 @@
+// 변경점: 댓글 ⋮ 메뉴를 createPortal로 document.body에 띄워서
+//          스크롤(overflow: auto) 영역에 잘리지 않게 처리
+
 import React, {
   useEffect,
   useMemo,
@@ -5,6 +8,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
+import { createPortal } from "react-dom";
 import * as S from "./CommunityPostModal.style";
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
@@ -24,9 +28,6 @@ const CommunityPostModal = ({
   const [commentText, setCommentText] = useState("");
   const [isCommentComposeOpen, setIsCommentComposeOpen] = useState(false);
 
-  // ✅ 내 댓글 메뉴(⋮) 열려있는 댓글 key
-  const [openMenuKey, setOpenMenuKey] = useState(null);
-
   // ✅ 인라인 수정 모드
   const [editingKey, setEditingKey] = useState(null);
   const [draftText, setDraftText] = useState("");
@@ -41,6 +42,25 @@ const CommunityPostModal = ({
   const [isExpanded, setIsExpanded] = useState(false); // 게시글 문장 길이 자세히보기, 간단히
   const [canToggle, setCanToggle] = useState(false);
   const descRef = useRef(null);
+
+  const [hoverKey, setHoverKey] = useState(null);
+
+  // ✅ 🔥 포탈 메뉴 상태: { key, comment } / null
+  const [openMenu, setOpenMenu] = useState(null);
+  // ✅ 🔥 포탈 메뉴 위치: { top, left } / null
+  const [menuPos, setMenuPos] = useState(null);
+
+  // ✅ 최신 상태를 키다운 이벤트에서 쓰기 위해 ref로 보관
+  const openMenuRef = useRef(openMenu);
+  const editingKeyRef = useRef(editingKey);
+
+  useEffect(() => {
+    openMenuRef.current = openMenu;
+  }, [openMenu]);
+
+  useEffect(() => {
+    editingKeyRef.current = editingKey;
+  }, [editingKey]);
 
   const isMine = useCallback(
     (c) => {
@@ -77,8 +97,9 @@ const CommunityPostModal = ({
   // ✅ 수정 시작
   const startEdit = useCallback((key, c) => {
     setEditingKey(key);
-    setDraftText("");
-    setOpenMenuKey(null);
+    setDraftText(c?.text ?? ""); // ✅ 기존 텍스트로 채우는 게 자연스러움
+    setOpenMenu(null);
+    setMenuPos(null);
   }, []);
 
   // ✅ 수정 취소
@@ -99,31 +120,19 @@ const CommunityPostModal = ({
     [draftText, onEditComment],
   );
 
+  // ✅ open/post 바뀔 때 초기화
   useEffect(() => {
     if (!open) return;
 
     setActiveIndex(0);
     setCommentText("");
     setIsCommentComposeOpen(false);
-    setOpenMenuKey(null);
+    setOpenMenu(null);
+    setMenuPos(null);
     setEditingKey(null);
     setDraftText("");
     setIsExpanded(false);
-  }, [open, post?.id]); // post 바뀔 때도 초기화되게
-
-  const [hoverKey, setHoverKey] = useState(null);
-
-  // ✅ 최신 상태를 키다운 이벤트에서 쓰기 위해 ref로 보관
-  const openMenuKeyRef = useRef(openMenuKey);
-  const editingKeyRef = useRef(editingKey);
-
-  useEffect(() => {
-    openMenuKeyRef.current = openMenuKey;
-  }, [openMenuKey]);
-
-  useEffect(() => {
-    editingKeyRef.current = editingKey;
-  }, [editingKey]);
+  }, [open, post?.id]);
 
   // ✅ 2) 키보드 이벤트만 담당 (초기화 절대 금지)
   useEffect(() => {
@@ -135,8 +144,9 @@ const CommunityPostModal = ({
           cancelEdit();
           return;
         }
-        if (openMenuKeyRef.current) {
-          setOpenMenuKey(null);
+        if (openMenuRef.current) {
+          setOpenMenu(null);
+          setMenuPos(null);
           return;
         }
         onClose?.();
@@ -164,19 +174,22 @@ const CommunityPostModal = ({
     return () => cancelAnimationFrame(raf);
   }, [open, post?.id, post?.content, isExpanded]);
 
-  // ✅ 🔥 메뉴(⋮)가 열려있을 때만: 바깥 클릭하면 닫기 (MenuBox 1초컷 해결)
+  // ✅ 포탈 메뉴 열려있을 때: 스크롤/리사이즈하면 위치 재계산이 어려우니 그냥 닫기(안전)
   useEffect(() => {
-    if (openMenuKey === null) return;
+    if (!openMenu) return;
 
-    const handleWindowClick = () => {
-      setOpenMenuKey(null);
+    const close = () => {
+      setOpenMenu(null);
+      setMenuPos(null);
     };
 
-    window.addEventListener("click", handleWindowClick);
+    window.addEventListener("scroll", close, true); // capture로 내부 스크롤도 잡힘
+    window.addEventListener("resize", close);
     return () => {
-      window.removeEventListener("click", handleWindowClick);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
     };
-  }, [openMenuKey]);
+  }, [openMenu]);
 
   if (!open) return null;
 
@@ -350,65 +363,35 @@ const CommunityPostModal = ({
                                   e.stopPropagation();
                                   if (isEditing) return;
 
-                                  setOpenMenuKey((prev) =>
-                                    prev === key ? null : key,
+                                  const rect =
+                                    e.currentTarget.getBoundingClientRect();
+
+                                  const MENU_W = 110;
+                                  const MENU_H = 92;
+                                  const GAP = 8;
+
+                                  let top = rect.top - MENU_H - GAP; // 위로
+                                  let left = rect.right - MENU_W;
+
+                                  const pad = 8;
+                                  top = Math.max(pad, top);
+                                  left = Math.max(
+                                    pad,
+                                    Math.min(
+                                      left,
+                                      window.innerWidth - MENU_W - pad,
+                                    ),
+                                  );
+
+                                  setMenuPos({ top, left });
+
+                                  setOpenMenu((prev) =>
+                                    prev?.key === key ? null : { key, comment: c },
                                   );
                                 }}
                               >
                                 <S.KebabDots />
                               </S.KebabButton>
-
-                              {/* 메뉴: 위로 펼쳐지게 */}
-                              {openMenuKey === key && (
-                                <S.MenuBox
-                                  $direction="up"
-                                  onClick={(e) => e.stopPropagation()}
-                                  onMouseDown={(e) => e.stopPropagation()}
-                                >
-                                  <S.MenuItem
-                                    type="button"
-                                    $primary
-                                    onMouseEnter={() =>
-                                      setHoverKey(key + "-edit")
-                                    }
-                                    onMouseLeave={() => setHoverKey(null)}
-                                    onClick={() => startEdit(key, c)}
-                                  >
-                                    <S.MenuIcon
-                                      src={
-                                        hoverKey === key + "-edit"
-                                          ? "/assets/icons/main_pencil.svg"
-                                          : "/assets/icons/default_pencil.svg"
-                                      }
-                                      alt="수정"
-                                    />
-                                    수정
-                                  </S.MenuItem>
-
-                                  <S.MenuItem
-                                    type="button"
-                                    $danger
-                                    onMouseEnter={() =>
-                                      setHoverKey(key + "-del")
-                                    }
-                                    onMouseLeave={() => setHoverKey(null)}
-                                    onClick={() => {
-                                      setOpenMenuKey(null);
-                                      onDeleteComment?.(c);
-                                    }}
-                                  >
-                                    <S.MenuIcon
-                                      src={
-                                        hoverKey === key + "-del"
-                                          ? "/assets/icons/main_trash.svg"
-                                          : "/assets/icons/default_trash.svg"
-                                      }
-                                      alt="삭제"
-                                    />
-                                    삭제
-                                  </S.MenuItem>
-                                </S.MenuBox>
-                              )}
                             </S.CommentMenuWrap>
                           )}
                         </S.CommentTop>
@@ -513,6 +496,66 @@ const CommunityPostModal = ({
           </S.Right>
         </S.Body>
       </S.Modal>
+
+      {/* ✅ 포탈: 스크롤 영역 밖(document.body)으로 메뉴를 빼서 절대 안 잘리게 */}
+      {openMenu && menuPos &&
+        createPortal(
+          <>
+            <S.MenuOverlay
+              onClick={() => {
+                setOpenMenu(null);
+                setMenuPos(null);
+              }}
+            />
+            <S.MenuBoxFixed
+              style={{ top: menuPos.top, left: menuPos.left }}
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <S.MenuItem
+                type="button"
+                $primary
+                onMouseEnter={() => setHoverKey(openMenu.key + "-edit")}
+                onMouseLeave={() => setHoverKey(null)}
+                onClick={() => startEdit(openMenu.key, openMenu.comment)}
+              >
+                <S.MenuIcon
+                  src={
+                    hoverKey === openMenu.key + "-edit"
+                      ? "/assets/icons/main_pencil.svg"
+                      : "/assets/icons/default_pencil.svg"
+                  }
+                  alt="수정"
+                />
+                수정
+              </S.MenuItem>
+
+              <S.MenuItem
+                type="button"
+                $danger
+                onMouseEnter={() => setHoverKey(openMenu.key + "-del")}
+                onMouseLeave={() => setHoverKey(null)}
+                onClick={() => {
+                  const c = openMenu.comment;
+                  setOpenMenu(null);
+                  setMenuPos(null);
+                  onDeleteComment?.(c);
+                }}
+              >
+                <S.MenuIcon
+                  src={
+                    hoverKey === openMenu.key + "-del"
+                      ? "/assets/icons/main_trash.svg"
+                      : "/assets/icons/default_trash.svg"
+                  }
+                  alt="삭제"
+                />
+                삭제
+              </S.MenuItem>
+            </S.MenuBoxFixed>
+          </>,
+          document.body,
+        )}
     </S.Backdrop>
   );
 };
