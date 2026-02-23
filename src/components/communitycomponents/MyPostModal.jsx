@@ -1,8 +1,21 @@
-// MyPostModal.jsx
-import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
+// 변경점: "댓글 ⋮ 메뉴"만 createPortal로 document.body에 띄워서
+//          CommentScrollArea(overflow: auto)에 안 잘리게 처리!
+// 게시글 ⋮(TopRow), 댓글관리 ⋮(헤더) 메뉴는 기존 MenuBox 그대로 유지
+
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
+import { createPortal } from "react-dom";
 import * as S from "./MyPostModal.style";
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+const SELECT_ICON_OFF = "/assets/icons/empty_check_dot.svg";
+const SELECT_ICON_ON = "/assets/icons/check_dot_filled.svg";
 
 const MyPostModal = ({
   open,
@@ -18,7 +31,6 @@ const MyPostModal = ({
   onEditPost, // (postId, patch) => {}
   onDeletePost, // (postId) => {}
   onEditPostImage, // (postId, index, fileOrUrl) => {}
-  onDeleteAllComments, // (postId) => {}
   onDeleteSelectedComments, // (postId, selectedKeysOrIndexes) => {}
 }) => {
   // 이미지/댓글
@@ -33,11 +45,14 @@ const MyPostModal = ({
   const [commentText, setCommentText] = useState("");
   const [isCommentComposeOpen, setIsCommentComposeOpen] = useState(false);
 
-  // 댓글 ⋮ 메뉴 + 인라인 편집
-  const [openMenuKey, setOpenMenuKey] = useState(null);
+  // 댓글 인라인 편집
   const [editingKey, setEditingKey] = useState(null);
   const [draftText, setDraftText] = useState("");
   const [hoverKey, setHoverKey] = useState(null);
+
+  // ✅ 댓글 ⋮ 메뉴(포탈) 상태/위치
+  const [openCommentMenu, setOpenCommentMenu] = useState(null); // { key, comment } | null
+  const [commentMenuPos, setCommentMenuPos] = useState(null); // { top, left } | null
 
   // 게시글(TopRow) ⋮ 메뉴 + 게시글 편집 모드
   const [openPostMenu, setOpenPostMenu] = useState(false);
@@ -50,7 +65,6 @@ const MyPostModal = ({
   const [openCommentAdminMenu, setOpenCommentAdminMenu] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState(() => new Set());
-  const [adminEditMode, setAdminEditMode] = useState(false);
 
   // 본문 펼치기/접기
   const [isExpanded, setIsExpanded] = useState(false);
@@ -98,10 +112,11 @@ const MyPostModal = ({
   }, [commentText, onSubmitComment]);
 
   // ===== 댓글 편집 =====
-  const startEdit = useCallback((key) => {
+  const startEdit = useCallback((key, c) => {
     setEditingKey(key);
-    setDraftText("");
-    setOpenMenuKey(null);
+    setDraftText(c?.text ?? "");
+    setOpenCommentMenu(null);
+    setCommentMenuPos(null);
   }, []);
 
   const cancelEdit = useCallback(() => {
@@ -120,7 +135,18 @@ const MyPostModal = ({
     [draftText, onEditComment],
   );
 
-  // ===== 댓글 선택 삭제 =====
+  // ✅ 댓글 key 목록 (select all 계산용)
+  const allCommentKeys = useMemo(() => {
+    return comments.map((c, idx) => `${c.nickname}-${idx}`);
+  }, [comments]);
+
+  const allSelected = useMemo(() => {
+    return (
+      allCommentKeys.length > 0 && selectedKeys.size === allCommentKeys.length
+    );
+  }, [allCommentKeys.length, selectedKeys.size]);
+
+  // ===== 선택 토글 (1개) =====
   const toggleSelect = useCallback((key) => {
     setSelectedKeys((prev) => {
       const next = new Set(prev);
@@ -130,13 +156,19 @@ const MyPostModal = ({
     });
   }, []);
 
-  const handleDeleteAllComments = useCallback(() => {
-    if (!post?.id) return;
-    const ok = window.confirm("댓글을 전체 삭제할까요?");
-    if (!ok) return;
-    onDeleteAllComments?.(post.id);
-  }, [post?.id, onDeleteAllComments]);
+  // ===== 전체 선택 토글 =====
+  const toggleSelectAll = useCallback(() => {
+    setSelectedKeys((prev) => {
+      // 이미 전체 선택이면 -> 전체 해제
+      if (allCommentKeys.length > 0 && prev.size === allCommentKeys.length) {
+        return new Set();
+      }
+      // 아니면 -> 전체 선택
+      return new Set(allCommentKeys);
+    });
+  }, [allCommentKeys]);
 
+  // ===== 선택 삭제 실행 =====
   const handleDeleteSelected = useCallback(() => {
     if (!post?.id) return;
     if (selectedKeys.size === 0) return;
@@ -149,6 +181,12 @@ const MyPostModal = ({
     setSelectMode(false);
   }, [post?.id, selectedKeys, onDeleteSelectedComments]);
 
+  // ===== selectMode 종료 =====
+  const exitSelectMode = useCallback(() => {
+    setSelectMode(false);
+    setSelectedKeys(new Set());
+  }, []);
+
   // ===== 게시글 편집 draft 초기화 =====
   useEffect(() => {
     if (!open) return;
@@ -157,10 +195,12 @@ const MyPostModal = ({
     setCommentText("");
     setIsCommentComposeOpen(false);
 
-    setOpenMenuKey(null);
     setEditingKey(null);
     setDraftText("");
     setHoverKey(null);
+
+    setOpenCommentMenu(null);
+    setCommentMenuPos(null);
 
     setOpenPostMenu(false);
     setIsPostEditing(false);
@@ -168,7 +208,6 @@ const MyPostModal = ({
     setOpenCommentAdminMenu(false);
     setSelectMode(false);
     setSelectedKeys(new Set());
-    setAdminEditMode(false);
 
     setIsExpanded(false);
 
@@ -215,7 +254,13 @@ const MyPostModal = ({
 
     onEditPost?.(post?.id, patch);
     setIsPostEditing(false);
-  }, [post?.id, postDraftTitle, postDraftContent, postDraftIngredients, onEditPost]);
+  }, [
+    post?.id,
+    postDraftTitle,
+    postDraftContent,
+    postDraftIngredients,
+    onEditPost,
+  ]);
 
   // ===== 자세히 보기/간단히 토글 가능 여부 =====
   useEffect(() => {
@@ -232,12 +277,12 @@ const MyPostModal = ({
   }, [open, post?.id, post?.content, isExpanded]);
 
   // ===== ESC/좌우/전송 =====
-  const openMenuKeyRef = useRef(openMenuKey);
+  const openCommentMenuRef = useRef(openCommentMenu);
   const editingKeyRef = useRef(editingKey);
 
   useEffect(() => {
-    openMenuKeyRef.current = openMenuKey;
-  }, [openMenuKey]);
+    openCommentMenuRef.current = openCommentMenu;
+  }, [openCommentMenu]);
 
   useEffect(() => {
     editingKeyRef.current = editingKey;
@@ -252,11 +297,15 @@ const MyPostModal = ({
           cancelEdit();
           return;
         }
-        if (openMenuKeyRef.current) {
-          setOpenMenuKey(null);
+        if (openCommentMenuRef.current) {
+          setOpenCommentMenu(null);
+          setCommentMenuPos(null);
           return;
         }
-        // 열려있는 상단 메뉴들 닫기
+        if (selectMode) {
+          exitSelectMode();
+          return;
+        }
         if (openPostMenu) setOpenPostMenu(false);
         if (openCommentAdminMenu) setOpenCommentAdminMenu(false);
         onClose?.();
@@ -277,16 +326,26 @@ const MyPostModal = ({
     cancelEdit,
     openPostMenu,
     openCommentAdminMenu,
+    selectMode,
+    exitSelectMode,
   ]);
 
-  // ===== 메뉴 바깥 클릭 닫기 (댓글 ⋮) =====
+  // ✅ 포탈 댓글 메뉴 열려있을 때: 스크롤/리사이즈 시 닫기
   useEffect(() => {
-    if (openMenuKey === null) return;
+    if (!openCommentMenu) return;
 
-    const handleWindowClick = () => setOpenMenuKey(null);
-    window.addEventListener("click", handleWindowClick);
-    return () => window.removeEventListener("click", handleWindowClick);
-  }, [openMenuKey]);
+    const close = () => {
+      setOpenCommentMenu(null);
+      setCommentMenuPos(null);
+    };
+
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    return () => {
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
+  }, [openCommentMenu]);
 
   // ===== 메뉴 바깥 클릭 닫기 (게시글 ⋮ / 댓글관리 ⋮) =====
   useEffect(() => {
@@ -311,7 +370,11 @@ const MyPostModal = ({
         if (e.target === e.currentTarget) onClose?.();
       }}
     >
-      <S.Modal onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+      <S.Modal
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
         {/* 이미지 업로드 input */}
         <input
           ref={fileRef}
@@ -324,7 +387,10 @@ const MyPostModal = ({
         {/* 상단 이미지 영역 */}
         <S.Hero>
           <S.CloseButton type="button" onClick={onClose} aria-label="닫기">
-            <S.CloseIcon src={`${process.env.PUBLIC_URL}/assets/icons/close.svg`} alt="닫기" />
+            <S.CloseIcon
+              src={`${process.env.PUBLIC_URL}/assets/icons/close.svg`}
+              alt="닫기"
+            />
           </S.CloseButton>
 
           {hasImages ? (
@@ -340,10 +406,19 @@ const MyPostModal = ({
 
               {images.length > 1 && (
                 <S.NavControls>
-                  <S.NavButtonLeft disabled={images.length <= 1} onClick={handlePrev} type="button">
+                  <S.NavButtonLeft
+                    disabled={images.length <= 1}
+                    onClick={handlePrev}
+                    type="button"
+                  >
                     <S.NavIcon src="/assets/icons/left.svg" alt="이전" />
                   </S.NavButtonLeft>
-                  <S.NavButtonRight disabled={images.length <= 1} onClick={handleNext} type="button">
+
+                  <S.NavButtonRight
+                    disabled={images.length <= 1}
+                    onClick={handleNext}
+                    type="button"
+                  >
                     <S.NavIcon src="/assets/icons/right.svg" alt="다음" />
                   </S.NavButtonRight>
                 </S.NavControls>
@@ -370,12 +445,18 @@ const MyPostModal = ({
 
                 <S.MetaRight>
                   <S.LevelBadge>
-                    <S.LevelIcon src={`${process.env.PUBLIC_URL}/assets/icons/star.svg`} alt="레벨" />
+                    <S.LevelIcon
+                      src={`${process.env.PUBLIC_URL}/assets/icons/star.svg`}
+                      alt="레벨"
+                    />
                     <span>Lv.{post?.author?.level ?? 1}</span>
                   </S.LevelBadge>
 
                   <S.LikeBadge>
-                    <S.HeartIcon src={`${process.env.PUBLIC_URL}/assets/icons/heart.svg`} alt="좋아요" />
+                    <S.HeartIcon
+                      src={`${process.env.PUBLIC_URL}/assets/icons/heart.svg`}
+                      alt="좋아요"
+                    />
                     <span>{post?.likes ?? 0}</span>
                   </S.LikeBadge>
                 </S.MetaRight>
@@ -401,42 +482,70 @@ const MyPostModal = ({
                   {openPostMenu && (
                     <S.MenuBox
                       $direction="down"
+                      $w={120}
                       onClick={(e) => e.stopPropagation()}
                       onMouseDown={(e) => e.stopPropagation()}
                     >
                       <S.MenuItem
                         type="button"
+                        onMouseEnter={() => setHoverKey("post-edit-img")}
+                        onMouseLeave={() => setHoverKey(null)}
                         onClick={() => {
                           setOpenPostMenu(false);
                           handleClickImageEdit();
                         }}
                       >
-                        <S.MenuIcon src="/assets/icons/default_edit_img.svg" alt="이미지 수정" />
+                        <S.MenuIcon
+                          src={
+                            hoverKey === "post-edit-img"
+                              ? "/assets/icons/hover_edit_img.svg"
+                              : "/assets/icons/default_edit_img.svg"
+                          }
+                          alt="이미지 수정"
+                        />
                         이미지 수정
                       </S.MenuItem>
 
                       <S.MenuItem
                         type="button"
                         $primary
+                        onMouseEnter={() => setHoverKey("post-edit")}
+                        onMouseLeave={() => setHoverKey(null)}
                         onClick={() => {
                           setOpenPostMenu(false);
                           setIsPostEditing(true);
                         }}
                       >
-                        <S.MenuIcon src="/assets/icons/default_pencil.svg" alt="게시글 수정" />
+                        <S.MenuIcon
+                          src={
+                            hoverKey === "post-edit"
+                              ? "/assets/icons/main_pencil.svg"
+                              : "/assets/icons/default_pencil.svg"
+                          }
+                          alt="게시글 수정"
+                        />
                         게시글 수정
                       </S.MenuItem>
 
                       <S.MenuItem
                         type="button"
                         $danger
+                        onMouseEnter={() => setHoverKey("post-del")}
+                        onMouseLeave={() => setHoverKey(null)}
                         onClick={() => {
                           setOpenPostMenu(false);
                           const ok = window.confirm("게시글을 삭제할까요?");
                           if (ok) onDeletePost?.(post?.id);
                         }}
                       >
-                        <S.MenuIcon src="/assets/icons/default_trash.svg" alt="게시글 삭제" />
+                        <S.MenuIcon
+                          src={
+                            hoverKey === "post-del"
+                              ? "/assets/icons/main_trash.svg"
+                              : "/assets/icons/default_trash.svg"
+                          }
+                          alt="게시글 삭제"
+                        />
                         게시글 삭제
                       </S.MenuItem>
                     </S.MenuBox>
@@ -472,7 +581,11 @@ const MyPostModal = ({
                   <S.PostEditButton type="button" onClick={cancelPostEdit}>
                     취소
                   </S.PostEditButton>
-                  <S.PostEditButton type="button" $primary onClick={savePostEdit}>
+                  <S.PostEditButton
+                    type="button"
+                    $primary
+                    onClick={savePostEdit}
+                  >
                     저장
                   </S.PostEditButton>
                 </S.PostEditActionRow>
@@ -486,7 +599,10 @@ const MyPostModal = ({
                 </S.Desc>
 
                 {canToggle && (
-                  <S.DetailLink type="button" onClick={() => setIsExpanded((v) => !v)}>
+                  <S.DetailLink
+                    type="button"
+                    onClick={() => setIsExpanded((v) => !v)}
+                  >
                     {isExpanded ? "간단히" : "자세히 보기"}
                   </S.DetailLink>
                 )}
@@ -508,103 +624,121 @@ const MyPostModal = ({
           {/* RIGHT */}
           <S.Right>
             <S.CommentCard>
-              {/* 댓글 헤더 (딱 1번만) */}
+              {/* 댓글 헤더 */}
+              {/* 댓글 헤더 */}
               <S.CommentHeader>
+                {/* 1) 왼쪽: 댓글 수 */}
                 <S.CommentHeaderTop>
                   댓글 <b>{comments.length}</b>
                 </S.CommentHeaderTop>
 
-                {/* 선택삭제 모드 액션 */}
+                {/* 2) 가운데: 전체선택 (selectMode일 때만) */}
                 {isPostMine && selectMode && (
-                  <S.SelectActionBar>
-                    <S.PostEditButton
-                      type="button"
-                      onClick={() => {
-                        setSelectMode(false);
-                        setSelectedKeys(new Set());
-                      }}
-                    >
-                      취소
-                    </S.PostEditButton>
-                    <S.PostEditButton
-                      type="button"
-                      $danger
-                      disabled={selectedKeys.size === 0}
-                      onClick={handleDeleteSelected}
-                    >
-                      선택 삭제
-                    </S.PostEditButton>
-                  </S.SelectActionBar>
+                  <S.CommentHeaderCenter>
+                    <S.SelectAllButton type="button" onClick={toggleSelectAll}>
+                      <S.SelectAllText>전체 선택</S.SelectAllText>
+                      <S.SelectAllIcon
+                        src={allSelected ? SELECT_ICON_ON : SELECT_ICON_OFF}
+                        alt="전체 선택"
+                      />
+                    </S.SelectAllButton>
+                  </S.CommentHeaderCenter>
                 )}
 
-                {/* 댓글 관리 ⋮ */}
-                {isPostMine && (
-                  <S.CommentMenuWrap
-                    onClick={(e) => e.stopPropagation()}
-                    onMouseDown={(e) => e.stopPropagation()}
-                  >
-                    <S.KebabButton
-                      type="button"
-                      aria-label="댓글 관리"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenCommentAdminMenu((v) => !v);
-                      }}
-                    >
-                      <S.KebabDots />
-                    </S.KebabButton>
-
-                    {openCommentAdminMenu && (
-                      <S.MenuBox
-                        $direction="down"
-                        onClick={(e) => e.stopPropagation()}
-                        onMouseDown={(e) => e.stopPropagation()}
+                {/* 3) 오른쪽: selectMode면 취소/삭제, 아니면 ⋮ */}
+                <S.CommentHeaderRight>
+                  {isPostMine && selectMode ? (
+                    <S.SelectActionBar>
+                      <S.PostEditButton type="button" onClick={exitSelectMode}>
+                        취소
+                      </S.PostEditButton>
+                      <S.PostEditButton
+                        type="button"
+                        $danger
+                        disabled={selectedKeys.size === 0}
+                        onClick={handleDeleteSelected}
                       >
-                        <S.MenuItem
-                          type="button"
-                          $danger
-                          onClick={() => {
-                            setOpenCommentAdminMenu(false);
-                            handleDeleteAllComments();
-                          }}
+                        삭제
+                      </S.PostEditButton>
+                    </S.SelectActionBar>
+                  ) : (
+                    <>
+                      {isPostMine && (
+                        <S.CommentHeaderMenuWrap
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
                         >
-                          <S.MenuIcon src="/assets/icons/default_trash.svg" alt="전체 삭제" />
-                          전체 삭제
-                        </S.MenuItem>
+                          <S.KebabButton
+                            type="button"
+                            aria-label="댓글 관리"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenCommentAdminMenu((v) => !v);
+                            }}
+                          >
+                            <S.KebabDots />
+                          </S.KebabButton>
 
-                        <S.MenuItem
-                          type="button"
-                          onClick={() => {
-                            setOpenCommentAdminMenu(false);
-                            setSelectMode(true);
-                            setAdminEditMode(false);
-                            setSelectedKeys(new Set());
-                          }}
-                        >
-                          <S.MenuIcon
-                            src="/assets/icons/default_check_circle_broken.svg"
-                            alt="선택 삭제"
-                          />
-                          선택 삭제
-                        </S.MenuItem>
+                          {openCommentAdminMenu && (
+                            <S.MenuBox
+                              $direction="down"
+                              $w={120}
+                              onClick={(e) => e.stopPropagation()}
+                              onMouseDown={(e) => e.stopPropagation()}
+                            >
+                              <S.MenuItem
+                                type="button"
+                                $danger
+                                onMouseEnter={() =>
+                                  setHoverKey("admin-del-all")
+                                }
+                                onMouseLeave={() => setHoverKey(null)}
+                                onClick={() => {
+                                  setOpenCommentAdminMenu(false);
+                                  setSelectMode(true);
+                                  setSelectedKeys(new Set(allCommentKeys));
+                                }}
+                              >
+                                <S.MenuIcon
+                                  src={
+                                    hoverKey === "admin-del-all"
+                                      ? "/assets/icons/main_trash.svg"
+                                      : "/assets/icons/default_trash.svg"
+                                  }
+                                  alt="전체 선택"
+                                />
+                                전체 삭제
+                              </S.MenuItem>
 
-                        <S.MenuItem
-                          type="button"
-                          $primary
-                          onClick={() => {
-                            setOpenCommentAdminMenu(false);
-                            setAdminEditMode((v) => !v);
-                            setSelectMode(false);
-                            setSelectedKeys(new Set());
-                          }}
-                        >
-                          <S.MenuIcon src="/assets/icons/default_pencil.svg" alt="댓글 수정" />
-                          댓글 수정
-                        </S.MenuItem>
-                      </S.MenuBox>
-                    )}
-                  </S.CommentMenuWrap>
-                )}
+                              <S.MenuItem
+                                type="button"
+                                onMouseEnter={() =>
+                                  setHoverKey("admin-del-select")
+                                }
+                                onMouseLeave={() => setHoverKey(null)}
+                                onClick={() => {
+                                  setOpenCommentAdminMenu(false);
+                                  setSelectMode(true);
+                                  setSelectedKeys(new Set());
+                                }}
+                              >
+                                <S.MenuIcon
+                                  src={
+                                    hoverKey === "admin-del-select"
+                                      ? "/assets/icons/hover_check_circle_broken.svg"
+                                      : "/assets/icons/default_check_circle_broken.svg"
+                                  }
+                                  alt="선택 삭제"
+                                />
+                                선택 삭제
+                              </S.MenuItem>
+                            </S.MenuBox>
+                          )}
+                        </S.CommentHeaderMenuWrap>
+                      )}
+                    </>
+                  )}
+                </S.CommentHeaderRight>
               </S.CommentHeader>
 
               <S.SectionDivider />
@@ -612,25 +746,22 @@ const MyPostModal = ({
               {/* 댓글 리스트 */}
               <S.CommentScrollArea>
                 {comments.length === 0 ? (
-                  <S.EmptyComment>아직 댓글이 없어요. 첫 댓글을 남겨보세요!</S.EmptyComment>
+                  <S.EmptyComment>
+                    아직 댓글이 없어요. 첫 댓글을 남겨보세요!
+                  </S.EmptyComment>
                 ) : (
                   comments.map((c, idx) => {
                     const mine = isMine(c);
                     const key = `${c.nickname}-${idx}`;
                     const isEditing = editingKey === key;
 
+                    // ✅ selectMode에서는 케밥 숨김(우측에 선택 아이콘이 있어야 하니까)
+                    const canShowKebab = !selectMode && mine;
+                    const isSelected = selectedKeys.has(key);
 
                     return (
                       <S.CommentItem key={key}>
                         <S.CommentTop>
-                          {isPostMine && selectMode && (
-                            <input
-                              type="checkbox"
-                              checked={selectedKeys.has(key)}
-                              onChange={() => toggleSelect(key)}
-                            />
-                          )}
-
                           <S.CommentLeft>
                             <S.CommentNickname>{c.nickname}</S.CommentNickname>
 
@@ -640,8 +771,27 @@ const MyPostModal = ({
                             </S.CommentMeta>
                           </S.CommentLeft>
 
-                          {/* 수정/삭제 메뉴: 내 댓글 OR (내 글 && 댓글수정모드) */}
-                      
+                          {/* ✅ selectMode면 우측 선택 아이콘 */}
+                          {isPostMine && selectMode && (
+                            <S.SelectRowButton
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleSelect(key);
+                              }}
+                              aria-label="댓글 선택"
+                            >
+                              <S.SelectRowIcon
+                                src={
+                                  isSelected ? SELECT_ICON_ON : SELECT_ICON_OFF
+                                }
+                                alt={isSelected ? "선택됨" : "선택 안 됨"}
+                              />
+                            </S.SelectRowButton>
+                          )}
+
+                          {/* ✅ 댓글 ⋮ (포탈로 띄움) */}
+                          {canShowKebab && (
                             <S.CommentMenuWrap
                               onClick={(e) => e.stopPropagation()}
                               onMouseDown={(e) => e.stopPropagation()}
@@ -652,60 +802,39 @@ const MyPostModal = ({
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   if (isEditing) return;
-                                  setOpenMenuKey((prev) => (prev === key ? null : key));
+
+                                  const rect =
+                                    e.currentTarget.getBoundingClientRect();
+
+                                  const MENU_W = 110;
+                                  const MENU_H = 92;
+                                  const GAP = 8;
+
+                                  let top = rect.top - MENU_H - GAP;
+                                  let left = rect.right - MENU_W;
+
+                                  const pad = 8;
+                                  top = Math.max(pad, top);
+                                  left = Math.max(
+                                    pad,
+                                    Math.min(
+                                      left,
+                                      window.innerWidth - MENU_W - pad,
+                                    ),
+                                  );
+
+                                  setCommentMenuPos({ top, left });
+                                  setOpenCommentMenu((prev) =>
+                                    prev?.key === key
+                                      ? null
+                                      : { key, comment: c },
+                                  );
                                 }}
                               >
                                 <S.KebabDots />
                               </S.KebabButton>
-
-                              {openMenuKey === key && (
-                                <S.MenuBox
-                                  $direction="up"
-                                  onClick={(e) => e.stopPropagation()}
-                                  onMouseDown={(e) => e.stopPropagation()}
-                                >
-                                  <S.MenuItem
-                                    type="button"
-                                    $primary
-                                    onMouseEnter={() => setHoverKey(key + "-edit")}
-                                    onMouseLeave={() => setHoverKey(null)}
-                                    onClick={() => startEdit(key)}
-                                  >
-                                    <S.MenuIcon
-                                      src={
-                                        hoverKey === key + "-edit"
-                                          ? "/assets/icons/main_pencil.svg"
-                                          : "/assets/icons/default_pencil.svg"
-                                      }
-                                      alt="수정"
-                                    />
-                                    수정
-                                  </S.MenuItem>
-
-                                  <S.MenuItem
-                                    type="button"
-                                    $danger
-                                    onMouseEnter={() => setHoverKey(key + "-del")}
-                                    onMouseLeave={() => setHoverKey(null)}
-                                    onClick={() => {
-                                      setOpenMenuKey(null);
-                                      onDeleteComment?.(c);
-                                    }}
-                                  >
-                                    <S.MenuIcon
-                                      src={
-                                        hoverKey === key + "-del"
-                                          ? "/assets/icons/main_trash.svg"
-                                          : "/assets/icons/default_trash.svg"
-                                      }
-                                      alt="삭제"
-                                    />
-                                    삭제
-                                  </S.MenuItem>
-                                </S.MenuBox>
-                              )}
                             </S.CommentMenuWrap>
-                          }
+                          )}
                         </S.CommentTop>
 
                         <S.CommentTextWrap $editing={isEditing}>
@@ -733,7 +862,10 @@ const MyPostModal = ({
 
                         {isEditing && (
                           <S.EditActionRow>
-                            <S.EditActionButton type="button" onClick={cancelEdit}>
+                            <S.EditActionButton
+                              type="button"
+                              onClick={cancelEdit}
+                            >
                               취소
                             </S.EditActionButton>
                             <S.EditActionButton
@@ -767,7 +899,10 @@ const MyPostModal = ({
                   $disabled={count === 0}
                   disabled={count === 0}
                 >
-                  <S.SendIcon src={`${process.env.PUBLIC_URL}/assets/icons/send.svg`} alt="전송" />
+                  <S.SendIcon
+                    src={`${process.env.PUBLIC_URL}/assets/icons/send.svg`}
+                    alt="전송"
+                  />
                 </S.SendButton>
               </S.CommentComposer>
 
@@ -777,7 +912,11 @@ const MyPostModal = ({
 
               {isCommentComposeOpen && (
                 <S.ActionRow>
-                  <S.ActionButton type="button" $variant="ghost" onClick={resetComposer}>
+                  <S.ActionButton
+                    type="button"
+                    $variant="ghost"
+                    onClick={resetComposer}
+                  >
                     취소
                   </S.ActionButton>
                   <S.ActionButton
@@ -794,6 +933,71 @@ const MyPostModal = ({
             </S.CommentCard>
           </S.Right>
         </S.Body>
+
+        {/* ✅ 포탈: 댓글 ⋮ 메뉴 */}
+        {openCommentMenu &&
+          commentMenuPos &&
+          createPortal(
+            <>
+              <S.MenuOverlay
+                onClick={() => {
+                  setOpenCommentMenu(null);
+                  setCommentMenuPos(null);
+                }}
+              />
+              <S.MenuBoxFixed
+                style={{ top: commentMenuPos.top, left: commentMenuPos.left }}
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <S.MenuItem
+                  type="button"
+                  $primary
+                  onMouseEnter={() =>
+                    setHoverKey(openCommentMenu.key + "-edit")
+                  }
+                  onMouseLeave={() => setHoverKey(null)}
+                  onClick={() =>
+                    startEdit(openCommentMenu.key, openCommentMenu.comment)
+                  }
+                >
+                  <S.MenuIcon
+                    src={
+                      hoverKey === openCommentMenu.key + "-edit"
+                        ? "/assets/icons/main_pencil.svg"
+                        : "/assets/icons/default_pencil.svg"
+                    }
+                    alt="수정"
+                  />
+                  수정
+                </S.MenuItem>
+
+                <S.MenuItem
+                  type="button"
+                  $danger
+                  onMouseEnter={() => setHoverKey(openCommentMenu.key + "-del")}
+                  onMouseLeave={() => setHoverKey(null)}
+                  onClick={() => {
+                    const c = openCommentMenu.comment;
+                    setOpenCommentMenu(null);
+                    setCommentMenuPos(null);
+                    onDeleteComment?.(c);
+                  }}
+                >
+                  <S.MenuIcon
+                    src={
+                      hoverKey === openCommentMenu.key + "-del"
+                        ? "/assets/icons/main_trash.svg"
+                        : "/assets/icons/default_trash.svg"
+                    }
+                    alt="삭제"
+                  />
+                  삭제
+                </S.MenuItem>
+              </S.MenuBoxFixed>
+            </>,
+            document.body,
+          )}
       </S.Modal>
     </S.Backdrop>
   );
