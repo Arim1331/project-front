@@ -73,7 +73,7 @@ const openFindId = () => {
   const left = window.screen.width / 2 - width / 2;
   const top = window.screen.height / 2 - height / 2;
 
-  // 이메일 로그인 API 주소
+  // 아이디 찾기 주소
   const Find_Id_AUTH_URL = ``;
 
   window.open(
@@ -90,7 +90,7 @@ const openFindPw = () => {
   const left = window.screen.width / 2 - width / 2;
   const top = window.screen.height / 2 - height / 2;
 
-  // 이메일 로그인 API 주소
+  // 비밀번호 찾기 주소
   const FindPw_AUTH_URL = ``;
 
   window.open(
