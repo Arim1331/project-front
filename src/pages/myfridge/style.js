@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { flexCenter, flexCenterColumn } from "../../styles/common";
+import { flexCenter, flexCenterColumn, FONT_STYLE } from "../../styles/common";
 
 const S = {};
 
@@ -26,10 +26,9 @@ S.FridgeTitle = styled.h2`
   margin: 0 auto 24px auto;
   width: 100%;
   text-align: center;
-  font-family: 'Pretendard';
-  font-size: ${({ theme }) => theme.FONT_SIZE.h6};
-  font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.REGULAR};
-  color: #111111;
+  ${FONT_STYLE.GIANTS.H6_REGULAR};
+  color: ${({ theme }) => theme.PALLETE.mainblack};
+  margin-bottom: 16px;
 `;
 
 /* ====================
@@ -238,10 +237,37 @@ S.CardStyle = styled.div`
   border: 2px solid
     ${({ active }) => (active ? "#FF4E37" : "#E9E9EC")};
 
+  cursor: ${({ deleteMode }) => deleteMode ? "pointer" : "default"};
+
   &:hover ${S.HoverInfo} {
     opacity: 1;
     transform: translateY(0);
   }
+
+  ${({ deleteMode }) =>
+    deleteMode &&
+    `
+      transition: transform 0.1s;
+      &:hover {
+        transform: scale(0.97);
+      }
+    `}
+`;
+
+S.DeleteBadge = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #FF4E37;
+  background-color: ${({ active }) => active ? "#FF4E37" : "#fff"};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: white;
 `;
 
 S.CardTextStyle = styled.p`
