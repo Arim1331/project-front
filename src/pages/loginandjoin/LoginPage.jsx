@@ -1,35 +1,28 @@
 import React from "react";
-import { Link, Outlet } from "react-router-dom";
-import * as S from "./style";
-import IdComponent from "../../components/logincomponents/IdComponent";
-import PasswordComponent from "../../components/logincomponents/PasswordComponent";
-import KeepLoginCheckComponent from "../../components/logincomponents/KeepLoginCheckComponent";
-import LoginButtonComponent from "../../components/logincomponents/LoginButtonComponent";
+import { Link } from "react-router-dom";
 import FindIdComponent from "../../components/logincomponents/FindIdComponent";
 import FindPwComponent from "../../components/logincomponents/FindPwComponent";
 import QuickLoginComponent from "../../components/logincomponents/QuickLoginComponent";
+import Login from "../../components/logincomponents/Login";
+import S from "./style";
 
 const LoginPage = () => {
   return (
-    <S.LoginScreen>
-      <S.LoginContainer>
-        <S.LoginH1>로그인</S.LoginH1>
+    <S.Screen>
+      <S.Title>로그인</S.Title>
+      <S.Wrapper>
+        <Login />
 
-        <IdComponent />
-        <PasswordComponent />
-        <KeepLoginCheckComponent />
-        <LoginButtonComponent />
-
-        <S.FindAndJoinContainer>
+        <S.ServiceWrapper>
           <FindIdComponent />
           <p>|</p>
           <FindPwComponent />
           <p>|</p>
-          <S.StyledJoinLink to={"/join"}>회원가입</S.StyledJoinLink>
-        </S.FindAndJoinContainer>
+          <Link to={"/join"}>회원가입</Link>
+        </S.ServiceWrapper>
         <QuickLoginComponent />
-      </S.LoginContainer>
-    </S.LoginScreen>
+      </S.Wrapper>
+    </S.Screen>
   );
 };
 
