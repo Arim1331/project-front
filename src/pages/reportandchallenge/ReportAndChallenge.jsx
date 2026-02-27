@@ -1,6 +1,4 @@
 import React, { useRef } from "react";
-import * as S from "./style";
-
 import ReportChallengeHero from "../../components/reportchallengecomponents/ReportChallengeHero";
 import ChallengeList from "../../components/reportchallengecomponents/ChallengeList";
 import MaterialUsageTrend from "../../components/reportchallengecomponents/MaterialUsageTrend";

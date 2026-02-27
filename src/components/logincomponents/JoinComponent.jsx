@@ -1,41 +1,137 @@
+import { useMutation } from "@tanstack/react-query";
 import React from "react";
-import * as S from "../../pages/loginandjoin/style";
-import { openAppleLogin, openEmailLogin, openNaverLogin } from "./function";
+import { useForm } from "react-hook-form";
+import S from "./style";
 
 const JoinComponent = () => {
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { isSubmitting, isSubmitted, errors },
+  } = useForm({ mode: "onChange" });
+
+  //[] 바깥 ^는 문자열 처음을 의미
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[!@#])[\da-zA-Z!@#]{8,}$/;
+
+  const join = async (member) => {
+    const response = await fetch("http://localhost:10000/members/join", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(member),
+    });
+
+    if (!response.ok) {
+      throw new Error("회원가입 실패");
+    }
+    return response.json();
+  };
+
+  const joinMutation = useMutation({
+    mutationFn: join,
+    onSuccess: (res) => {
+      // 성공 처리
+      console.log(res);
+    },
+    onError: (error) => {
+      // 에러시 처리
+    },
+  });
+
+  const onSubmit = (formData) => {
+    const { memberPasswordConfirm, ...member } = formData;
+    // 데이터 요청(react query)
+    joinMutation.mutate(member);
+  };
+
   return (
     <div>
-      <S.JoinIconContainer>
-        <S.StyledJoinFieldset>
-          <S.JoinLegend align="center">&nbsp;또는&nbsp;</S.JoinLegend>
-          <S.JoinIconBox>
-            <S.JoinIconWrap>
-              <S.JoinIconImg
-                src="\assets\icons\email_button.png"
-                alt="이메일 버튼"
-                onClick={openEmailLogin}
-              />
-              <S.JoinSpan>이메일</S.JoinSpan>
-            </S.JoinIconWrap>
-            <S.JoinIconWrap>
-              <S.JoinIconImg
-                src="\assets\icons\naver_button.png"
-                alt="네이버 버튼"
-                onClick={openNaverLogin}
-              />
-              <S.JoinSpan>네이버</S.JoinSpan>
-            </S.JoinIconWrap>
-            <S.JoinIconWrap>
-              <S.JoinIconImg
-                src="\assets\icons\apple_button.png"
-                alt="애플 버튼"
-                onClick={openAppleLogin}
-              />
-              <S.JoinSpan>애플</S.JoinSpan>
-            </S.JoinIconWrap>
-          </S.JoinIconBox>
-        </S.StyledJoinFieldset>
-      </S.JoinIconContainer>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <label>
+          <p>이메일</p>
+          <S.Input
+            type="text"
+            placeholder="아이디를 입력하세요."
+            {...register("memberEmail", {
+              required: true,
+              pattern: {
+                value: emailRegex,
+              },
+            })}
+          />
+          {errors?.memberEmail?.type === "required" && (
+            <p>이메일을 입력해주세요</p>
+          )}
+          {errors?.memberEmail?.type === "pattern" && (
+            <p>이메일 양식에 맞게 입력해주세요</p>
+          )}
+        </label>
+
+        <label>
+          <p>비밀번호</p>
+          <S.Input
+            type="password"
+            placeholder="비밀번호를 입력하세요."
+            {...register("memberPassword", {
+              required: true,
+              pattern: {
+                value: passwordRegex,
+              },
+            })}
+          />
+          {errors?.memberPassword?.type === "required" && (
+            <p>비밀번호를 입력해주세요</p>
+          )}
+          {errors?.memberPassword?.type === "pattern" && (
+            <p>
+              소문자, 숫자, 특수문자를 각 하나 포함한 8자리 이상이여야 합니다.
+            </p>
+          )}
+        </label>
+
+        <label>
+          <p>비밀번호 확인</p>
+          <S.Input
+            type="password"
+            placeholder="비밀번호를 확인해주세요."
+            {...register("memberPasswordConfirm", {
+              required: true,
+              validate: {
+                matchPassword: (memberPasswordConfirm) => {
+                  const { memberPassword } = getValues();
+                  console.log(
+                    memberPasswordConfirm,
+                    memberPassword,
+                    memberPassword === memberPasswordConfirm,
+                  );
+                  return memberPassword === memberPasswordConfirm;
+                },
+              },
+            })}
+          />
+          {errors?.memberPasswordConfirm && (
+            <p>비밀번호를 확인해주세요</p>
+          )}
+        </label>
+
+        <label>
+          <p>이름</p>
+          <S.Input
+            type="text"
+            placeholder="이름을 입력하세요"
+            {...register("memberName", {
+              required: true,
+            })}
+          />
+          {errors?.memberName && (
+            <p>이름을 입력하세요</p>
+          )}
+        </label>
+        <button disabled={isSubmitting}>회원가입</button>
+      </form>
     </div>
   );
 };

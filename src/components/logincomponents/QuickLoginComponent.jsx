@@ -1,24 +1,23 @@
 import React from "react";
-import * as S from '../../pages/loginandjoin/style';
-import KakaoLoginComponent from "./KakaoLoginComponent";
-import NaverLoginComponent from "./NaverLoginComponent";
-import AppleLoginComponent from "./AppleLoginComponent";
+import { Link } from "react-router-dom";
+import S from "./style";
 
 const QuickLoginComponent = () => {
-
-
-
   return (
-    <S.QuickContainer>
-      <S.StyledLoginFieldset>
-        <S.LoginLegend align="center">&nbsp;간편 로그인&nbsp;</S.LoginLegend>
-        <S.QuickIconBox>
-          <KakaoLoginComponent/>
-          <NaverLoginComponent/>
-          <AppleLoginComponent/>
-        </S.QuickIconBox>
-      </S.StyledLoginFieldset>
-    </S.QuickContainer>
+    <>
+      <S.Fieldset>
+        <legend align="center">&nbsp;간편 로그인&nbsp;</legend>
+        <S.Link to={"http://localhost:10000/auth/kakao"}>
+          <img src="\assets\icons\kakao_button.png" />
+        </S.Link>
+        <S.Link to={"http://localhost:10000/auth/naver"}>
+          <img src="\assets\icons\naver_button.png" />
+        </S.Link>
+        <S.Link to={"http://localhost:10000/auth/google"}>
+          <img src="\assets\icons\google_button.png" />
+        </S.Link>
+      </S.Fieldset>
+    </>
   );
 };
 

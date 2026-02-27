@@ -1,4 +1,4 @@
-import { flexCenter, FONT_STYLE } from "../../styles/common";
+import { FONT_STYLE } from "../../styles/common";
 import styled, { keyframes } from "styled-components";
 
 /** ---------------------------

@@ -2,7 +2,7 @@
 // ✅ 기존 MenuBox는 (게시글 ⋮ / 댓글관리 ⋮)에 계속 사용
 
 import styled from "styled-components";
-import { flexCenter, flexBetweenRow, FONT_STYLE } from "../../styles/common";
+import { flexCenter, FONT_STYLE } from "../../styles/common";
 
 /* ---------- modal ---------- */
 
