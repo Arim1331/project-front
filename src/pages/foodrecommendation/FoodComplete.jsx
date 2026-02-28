@@ -115,7 +115,8 @@ const FoodComplete = () => {
         level: user?.level || 1,
       },
 
-      createdAt: new Date().toLocaleDateString(),
+      // createdAt: new Date().toLocaleDateString(),
+      createdAt: new Date().toISOString(), // ✅ 날짜 포맷을 ISO로 통일 (트랜딩 캐러셀 NEW/인기 배지 계산 시 로케일 차이로 파싱 깨지는 것 방지)
       likes: 0,
       xp: selectedIngredientNames.length * 10, // 선택사항
       comments: [],

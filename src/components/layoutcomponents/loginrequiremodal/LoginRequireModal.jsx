@@ -25,7 +25,12 @@ const LoginRequireModal = ({
 
   return (
     <S.Backdrop onClick={onClose}>
-      <S.Modal onClick={(e) => e.stopPropagation()}>
+      <S.Modal
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="로그인 필요 안내"
+      >
         <S.IconWrapper>
           <S.Icon
             src={`${process.env.PUBLIC_URL}/assets/images/lock.svg`}
@@ -39,12 +44,8 @@ const LoginRequireModal = ({
         <S.Divider />
 
         <S.ButtonRow>
-          <S.CancelButton onClick={onClose}>
-            {cancelText}
-          </S.CancelButton>
-          <S.ConfirmButton onClick={onConfirm}>
-            {confirmText}
-          </S.ConfirmButton>
+          <S.CancelButton onClick={onClose}>{cancelText}</S.CancelButton>
+          <S.ConfirmButton onClick={onConfirm}>{confirmText}</S.ConfirmButton>
         </S.ButtonRow>
       </S.Modal>
     </S.Backdrop>

@@ -1,7 +1,5 @@
-// ✅ 다른 사람 글 클릭 => CommunityPostModal
-// ✅ 내 글 클릭 => MyPostModal
 import React, { useState, useCallback, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import * as S from "./style";
 
 import { CommunityHeader } from "../../components/communitycomponents/CommunityHeader";
@@ -11,90 +9,66 @@ import FloatingActions from "../../components/layoutcomponents/FloatingActions";
 
 import CommunityPostModal from "../../components/communitycomponents/CommunityPostModal";
 import MyPostModal from "../../components/communitycomponents/MyPostModal";
+import LoginRequireModal from "../../components/layoutcomponents/loginrequiremodal/LoginRequireModal";
 
 import usePostStore from "../../store/postStore";
 import useAuthStore from "../../store/authStore";
 
 const CommunityMain = () => {
-  // 로그인 유저 닉네임 (임시)
-  // const meNickname = "요리왕곰순";
-
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // ===== 피드용 mock items =====
-  // const allItems = useMemo(() => {
-  //   return Array.from({ length: 60 }, (_, i) => ({
-  //     id: i + 1,
-  //     recipeName: `레시피 ${i + 1}`,
-  //     // ✅ 내 글 테스트: 7개 중 1개는 내 닉네임으로
-  //     nickname: i % 7 === 0 ? meNickname : "파스타러버",
-  //     level: i % 7 === 0 ? 5 : 4,
-  //     likes: 30 + (i % 10) * 7,
-  //   }));
-  // }, [meNickname]);
-
   const { posts } = usePostStore();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
 
-  const meNickname = user?.nickname || "요리왕곰순";
+  // ✅ 로그인 유저 닉네임(없으면 게스트)
+  const meNickname = user?.nickname || "";
 
-  // postStore 연결
+  // ✅ 로그인 요구 모달
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+
+  // ✅ "로그인 필요 행동" 공통 래퍼
+  const requireLogin = useCallback(
+    (action) => {
+      if (!isAuthenticated || !user) {
+        setLoginModalOpen(true);
+        return false;
+      }
+      action?.();
+      return true;
+    },
+    [isAuthenticated, user],
+  );
+
+  const normalizeFromStore = useCallback((raw) => {
+    const nickname =
+      raw?.author?.nickname ?? raw?.nickname ?? raw?.authorNickname ?? "익명";
+    const level = raw?.author?.level ?? raw?.level ?? raw?.authorLevel ?? 1;
+    const images = raw?.images ?? (raw?.imageUrl ? [raw.imageUrl] : []);
+    return {
+      id: raw?.id,
+      recipeName: raw?.recipeTitle ?? raw?.recipeName ?? raw?.title ?? "",
+      nickname,
+      level,
+      images,
+      likes: raw?.likes ?? 0,
+      content: raw?.content ?? raw?.desc ?? "",
+      ingredients: raw?.ingredients ?? [],
+      createdAt: raw?.createdAt ?? "방금 전",
+      comments: raw?.comments ?? [],
+    };
+  }, []);
+
   const allItems = useMemo(() => {
-    return posts.map((post) => ({
-      id: post.id,
-      // recipeName: post.title,
-      // nickname: post.nickname,
-      // images: [post.imageUrl],
-      // level: 1,
-      recipeName: post.recipeTitle, // ✅ 수정
-      nickname: post.author?.nickname, // ✅ 수정
-      level: post.author?.level ?? 1, // ✅ 수정
-      images: post.images ?? [], // ✅ 수정
-      likes: post.likes ?? 0,
-      content: post.content,
-      ingredients: post.ingredients ?? [],
-      createdAt: post.createdAt,
-      comments: post.comments ?? [],
-    }));
-  }, [posts]);
+    return (posts ?? []).map(normalizeFromStore);
+  }, [posts, normalizeFromStore]);
 
-  // ===== mock post builder =====
-  // const buildMockPost = useCallback(
-  //   (item) => ({
-  //     id: item.id,
-  //     images: [
-  //       `${process.env.PUBLIC_URL}/assets/images/pancake.svg`,
-  //       `${process.env.PUBLIC_URL}/assets/images/carrot_laffe.svg`,
-  //     ],
-  //     author: {
-  //       nickname: item.nickname ?? "파스타러버",
-  //       level: item.level ?? 4,
-  //     },
-  //     likes: item.likes ?? 80,
-  //     createdAt: item.createdAt ?? "2025. 12. 20",
-  //     recipeTitle: item.recipeName ?? "팬케이크",
-  //     content:
-  //       item.desc ??
-  //       "딸기 팬케이크 완성! 반죽이 쫀쫀하고 소스가 진짜 부드러워요. 가족들이 엄청 좋아했습니다.",
-  //     ingredients: item.ingredients ?? ["밀가루", "생크림", "파슬리가루"],
-  //     xp: item.xp ?? 120,
-  //     comments: item.comments ?? [
-  //       { nickname: "금손수", time: "2초 전", text: "와 진짜 맛있어 보여요!" },
-  //       { nickname: "요리왕금손수", time: "5분 전", text: "두번째 댓글도 테스트!" },
-  //       { nickname: meNickname, time: "8분 전", text: "내 댓글 테스트🥲" },
-  //       { nickname: "테스트", time: "8분 전", text: "다른 사람 댓글" },
-  //     ],
-  //   }),
-  //   [meNickname]
-  // );
-
-  // ✅ 수정
-  const buildMockPost = useCallback(
-    (item) => ({
+  const buildMockPost = useCallback((item) => {
+    return {
       id: item.id,
       images: item.images ?? [],
       author: {
-        nickname: item.nickname,
+        nickname: item.nickname ?? "익명",
         level: item.level ?? 1,
       },
       likes: item.likes ?? 0,
@@ -104,57 +78,77 @@ const CommunityMain = () => {
       ingredients: item.ingredients ?? [],
       xp: 0,
       comments: item.comments ?? [],
-    }),
-    [],
-  );
+    };
+  }, []);
 
-  // ===== 모달 상태(2개) =====
   const [isOtherPostModalOpen, setIsOtherPostModalOpen] = useState(false);
   const [isMyPostModalOpen, setIsMyPostModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
 
-  // ===== 내 글인지 판별 =====
-  // const isMinePost = useCallback(
-  //   (post) => {
-  //     const authorNick = String(post?.author?.nickname ?? "").trim();
-  //     const me = String(meNickname ?? "").trim();
-  //     return !!authorNick && !!me && authorNick === me;
-  //   },
-  //   [meNickname]
-  // );
+  const [searchState, setSearchState] = useState({
+    keyword: "",
+    sort: "latest",
+  });
+  // 간단 텍스트 검색 (레시피명/본문/재료/닉네임)
+  const matchesKeyword = useCallback((item, keyword) => {
+    const q = keyword.trim().toLowerCase();
+    if (!q) return true;
 
-  // ===== 카드 클릭 => 내 글이면 MyPostModal / 아니면 CommunityPostModal =====
-  // const handleOpenAnyPostModal = useCallback(
-  //   (post) => {
-  //     setSelectedPost(post);
+    const hay = [
+      item.recipeName,
+      item.content,
+      item.nickname,
+      ...(item.ingredients ?? []),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
-  //     if (isMinePost(post)) {
-  //       setIsMyPostModalOpen(true);
-  //       setIsOtherPostModalOpen(false);
-  //     } else {
-  //       setIsOtherPostModalOpen(true);
-  //       setIsMyPostModalOpen(false);
-  //     }
-  //   },
-  //   [isMinePost]
-  // );
+    return hay.includes(q);
+  }, []);
 
-  // ✅ 수정 : 교체 코드
+  // 정렬 + 필터된 결과
+  const displayItems = useMemo(() => {
+    const filtered = allItems.filter((it) =>
+      matchesKeyword(it, searchState.keyword),
+    );
+
+    // 정렬: createdAt이 "방금 전" 같은 문자열이면 정확한 최신정렬이 어려워서
+    // 일단 likes 기반 인기순만 확실하게 하고, 최신순은 원본 순서 유지(or id desc)로 처리 추천
+    const sorted = [...filtered];
+
+    if (searchState.sort === "popular") {
+      sorted.sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0));
+    } else {
+      // latest: 원본이 최신순이라고 가정하거나, id가 증가형이면 id desc로
+      sorted.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+    }
+
+    return sorted;
+  }, [allItems, matchesKeyword, searchState]);
+
+  // ✅ 카드 클릭: 내 글이면 MyPostModal / 아니면 CommunityPostModal
   const handleOpenAnyPostModal = useCallback(
     (item) => {
-      const post = buildMockPost(item); // 🔥 여기서 구조 변환
+      const post = buildMockPost(item);
+      const isMine = !!meNickname && post.author?.nickname === meNickname;
 
-      setSelectedPost(post);
-
-      if (post.author.nickname === meNickname) {
-        setIsMyPostModalOpen(true);
-        setIsOtherPostModalOpen(false);
-      } else {
-        setIsOtherPostModalOpen(true);
-        setIsMyPostModalOpen(false);
+      // ✅ "내 글" 모달은 편집 기능이 있으니 로그인 필요로 묶는게 안전
+      if (isMine) {
+        requireLogin(() => {
+          setSelectedPost(post);
+          setIsMyPostModalOpen(true);
+          setIsOtherPostModalOpen(false);
+        });
+        return;
       }
+
+      // ✅ 다른 사람 글 모달은 누구나 열람 가능
+      setSelectedPost(post);
+      setIsOtherPostModalOpen(true);
+      setIsMyPostModalOpen(false);
     },
-    [buildMockPost, meNickname],
+    [buildMockPost, meNickname, requireLogin],
   );
 
   const handleCloseModals = useCallback(() => {
@@ -163,7 +157,7 @@ const CommunityMain = () => {
     setSelectedPost(null);
   }, []);
 
-  // ===== 쿼리스트링으로 모달 열기 (postId) =====
+  // ✅ 쿼리스트링으로 모달 열기(postId) - 테스트용
   useEffect(() => {
     const postId = searchParams.get("postId");
     if (!postId) return;
@@ -174,137 +168,176 @@ const CommunityMain = () => {
     const item = {
       id: idNum,
       recipeName: `레시피 ${idNum}`,
-      nickname: idNum % 7 === 0 ? meNickname : "파스타러버", // ✅ 테스트용
+      nickname: idNum % 7 === 0 ? meNickname : "파스타러버",
       level: 4,
       likes: 80,
+      images: [],
+      content: "",
+      ingredients: [],
+      createdAt: "방금 전",
+      comments: [],
     };
 
-    const mockPost = buildMockPost(item);
-    handleOpenAnyPostModal(mockPost);
-  }, [searchParams, buildMockPost, handleOpenAnyPostModal, meNickname]);
+    handleOpenAnyPostModal(item); // ✅ post 말고 item을 넣어야 함
+  }, [searchParams, meNickname, handleOpenAnyPostModal]);
 
-  // ===== 댓글 등록 =====
+  // ===== 댓글 등록 (로그인 필요) =====
   const handleSubmitComment = useCallback(
     (text) => {
-      const trimmed = String(text ?? "").trim();
-      if (!trimmed) return;
+      requireLogin(() => {
+        const trimmed = String(text ?? "").trim();
+        if (!trimmed) return;
 
-      setSelectedPost((prev) => {
-        if (!prev) return prev;
-        const newComment = {
-          nickname: meNickname,
-          time: "방금 전",
-          text: trimmed,
-        };
-        return { ...prev, comments: [newComment, ...(prev.comments ?? [])] };
+        setSelectedPost((prev) => {
+          if (!prev) return prev;
+          const newComment = {
+            nickname: meNickname,
+            time: "방금 전",
+            text: trimmed,
+          };
+          return { ...prev, comments: [newComment, ...(prev.comments ?? [])] };
+        });
       });
     },
-    [meNickname],
+    [requireLogin, meNickname],
   );
 
-  // ===== 댓글 수정 =====
-  const handleEditComment = useCallback((comment, nextTextFromModal) => {
-    const nextText =
-      typeof nextTextFromModal === "string"
-        ? nextTextFromModal
-        : window.prompt("댓글을 수정하세요", comment?.text ?? "");
+  // ===== 댓글 수정/삭제 (로그인 필요 + 내 댓글만 가능이지만 모달에서 이미 mine 체크) =====
+  const handleEditComment = useCallback(
+    (comment, nextTextFromModal) => {
+      requireLogin(() => {
+        const nextText =
+          typeof nextTextFromModal === "string"
+            ? nextTextFromModal
+            : window.prompt("댓글을 수정하세요", comment?.text ?? "");
 
-    if (nextText === null) return;
+        if (nextText === null) return;
+        const trimmed = String(nextText).trim();
+        if (!trimmed) return;
 
-    const trimmed = String(nextText).trim();
-    if (!trimmed) return;
+        setSelectedPost((prev) => {
+          if (!prev) return prev;
+          const nextComments = (prev.comments ?? []).map((c) =>
+            c === comment ? { ...c, text: trimmed, time: "방금 전" } : c,
+          );
+          return { ...prev, comments: nextComments };
+        });
+      });
+    },
+    [requireLogin],
+  );
 
-    setSelectedPost((prev) => {
-      if (!prev) return prev;
-      const nextComments = (prev.comments ?? []).map((c) =>
-        c === comment ? { ...c, text: trimmed, time: "방금 전" } : c,
-      );
-      return { ...prev, comments: nextComments };
-    });
-  }, []);
+  const handleDeleteComment = useCallback(
+    (comment) => {
+      requireLogin(() => {
+        const ok = window.confirm("댓글을 삭제할까요?");
+        if (!ok) return;
 
-  // ===== 댓글 삭제 =====
-  const handleDeleteComment = useCallback((comment) => {
-    const ok = window.confirm("댓글을 삭제할까요?");
-    if (!ok) return;
+        setSelectedPost((prev) => {
+          if (!prev) return prev;
+          const nextComments = (prev.comments ?? []).filter(
+            (c) => c !== comment,
+          );
+          return { ...prev, comments: nextComments };
+        });
+      });
+    },
+    [requireLogin],
+  );
 
-    setSelectedPost((prev) => {
-      if (!prev) return prev;
-      const nextComments = (prev.comments ?? []).filter((c) => c !== comment);
-      return { ...prev, comments: nextComments };
-    });
-  }, []);
-
-  // ===== 내 게시글 전용: 게시글 수정/삭제/이미지 수정/댓글 전체삭제/선택삭제 =====
-  const handleEditPost = useCallback((postId, patch) => {
-    setSelectedPost((prev) => {
-      if (!prev || prev.id !== postId) return prev;
-      return {
-        ...prev,
-        recipeTitle: patch?.recipeTitle ?? prev.recipeTitle,
-        content: patch?.content ?? prev.content,
-        ingredients: patch?.ingredients ?? prev.ingredients,
-      };
-    });
-  }, []);
+  // ===== 내 글 전용 액션들은 로그인 필요 =====
+  const handleEditPost = useCallback(
+    (postId, patch) => {
+      requireLogin(() => {
+        setSelectedPost((prev) => {
+          if (!prev || prev.id !== postId) return prev;
+          return {
+            ...prev,
+            recipeTitle: patch?.recipeTitle ?? prev.recipeTitle,
+            content: patch?.content ?? prev.content,
+            ingredients: patch?.ingredients ?? prev.ingredients,
+          };
+        });
+      });
+    },
+    [requireLogin],
+  );
 
   const handleDeletePost = useCallback(
     (postId) => {
-      console.log("delete post:", postId);
-      handleCloseModals();
+      requireLogin(() => {
+        console.log("delete post:", postId);
+        handleCloseModals();
+      });
     },
-    [handleCloseModals],
+    [requireLogin, handleCloseModals],
   );
 
-  const handleEditPostImage = useCallback((postId, index, fileOrUrl) => {
-    const nextUrl =
-      typeof fileOrUrl === "string"
-        ? fileOrUrl
-        : URL.createObjectURL(fileOrUrl);
+  const handleEditPostImage = useCallback(
+    (postId, index, fileOrUrl) => {
+      requireLogin(() => {
+        const nextUrl =
+          typeof fileOrUrl === "string"
+            ? fileOrUrl
+            : URL.createObjectURL(fileOrUrl);
 
-    setSelectedPost((prev) => {
-      if (!prev || prev.id !== postId) return prev;
-      const nextImages = [...(prev.images ?? [])];
-      nextImages[index] = nextUrl;
-      return { ...prev, images: nextImages };
-    });
-  }, []);
-
-  const handleDeleteAllComments = useCallback((postId) => {
-    setSelectedPost((prev) => {
-      if (!prev || prev.id !== postId) return prev;
-      return { ...prev, comments: [] };
-    });
-  }, []);
-
-  const handleDeleteSelectedComments = useCallback((postId, selectedKeys) => {
-    const selectedSet = new Set(selectedKeys ?? []);
-
-    setSelectedPost((prev) => {
-      if (!prev || prev.id !== postId) return prev;
-
-      const nextComments = (prev.comments ?? []).filter((c, idx) => {
-        const key = `${c.nickname}-${idx}`;
-        return !selectedSet.has(key);
+        setSelectedPost((prev) => {
+          if (!prev || prev.id !== postId) return prev;
+          const nextImages = [...(prev.images ?? [])];
+          nextImages[index] = nextUrl;
+          return { ...prev, images: nextImages };
+        });
       });
+    },
+    [requireLogin],
+  );
 
-      return { ...prev, comments: nextComments };
-    });
-  }, []);
+  const handleDeleteAllComments = useCallback(
+    (postId) => {
+      requireLogin(() => {
+        setSelectedPost((prev) => {
+          if (!prev || prev.id !== postId) return prev;
+          return { ...prev, comments: [] };
+        });
+      });
+    },
+    [requireLogin],
+  );
+
+  const handleDeleteSelectedComments = useCallback(
+    (postId, selectedKeys) => {
+      requireLogin(() => {
+        const selectedSet = new Set(selectedKeys ?? []);
+        setSelectedPost((prev) => {
+          if (!prev || prev.id !== postId) return prev;
+          const nextComments = (prev.comments ?? []).filter((c, idx) => {
+            const key = `${c.nickname}-${idx}`;
+            return !selectedSet.has(key);
+          });
+          return { ...prev, comments: nextComments };
+        });
+      });
+    },
+    [requireLogin],
+  );
 
   // ===== 트렌딩 카드 클릭 =====
   const handleTrendingCardClick = useCallback(
     (item) => {
-      const post = buildMockPost({
-        id: item.id,
-        recipeName: item.recipeName ?? `레시피 ${item.id}`,
-        nickname: item.nickname,
-        level: item.level,
-        likes: item.likes,
-      });
-      handleOpenAnyPostModal(post);
+      handleOpenAnyPostModal(item); // ✅ 이미 item 기반으로 열도록 통일해둠
     },
-    [buildMockPost, handleOpenAnyPostModal],
+    [handleOpenAnyPostModal],
+  );
+
+  // 좋아요 클릭시, 로그인 가드 걸기
+  const handleLikeToggle = useCallback(
+    (item, doToggle) => {
+      requireLogin(() => {
+        // 여기서 실제 서버 호출 자리(나중에) 가능
+        doToggle?.();
+      });
+    },
+    [requireLogin],
   );
 
   return (
@@ -314,7 +347,7 @@ const CommunityMain = () => {
       <S.Container>
         <CommunityHeader
           onSearch={({ keyword, sort }) => {
-            console.log("커뮤니티 검색", { keyword, sort });
+            setSearchState({ keyword, sort });
           }}
         />
       </S.Container>
@@ -323,19 +356,21 @@ const CommunityMain = () => {
 
       <S.Container>
         <TrendingCarousel
+          posts={posts}
           onCardClick={handleTrendingCardClick}
           meNickname={meNickname}
+          onLikeToggle={handleLikeToggle}
         />
         <S.SectionDivider />
 
         <FeedGrid
-          items={allItems}
+          items={displayItems}
           onCardClick={handleOpenAnyPostModal}
           meNickname={meNickname}
+          onLikeToggle={handleLikeToggle}
         />
       </S.Container>
 
-      {/* ✅ 모달은 둘 다 렌더하되 open으로 제어 (조건 렌더보다 안정적) */}
       <CommunityPostModal
         open={isOtherPostModalOpen}
         post={selectedPost}
@@ -345,6 +380,9 @@ const CommunityMain = () => {
         onSubmitComment={handleSubmitComment}
         onEditComment={handleEditComment}
         onDeleteComment={handleDeleteComment}
+        // ✅ 모달 안에서 "로그인 필요한 버튼"에 쓰라고 넘겨둠 (2번에서 씀)
+        requireLogin={requireLogin}
+        isAuthenticated={isAuthenticated}
       />
 
       <MyPostModal
@@ -363,6 +401,16 @@ const CommunityMain = () => {
       />
 
       <FloatingActions targetId="community-top" />
+
+      {/* ✅ 로그인 요구 모달 */}
+      <LoginRequireModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onConfirm={() => {
+          setLoginModalOpen(false);
+          navigate("/login");
+        }}
+      />
     </S.Page>
   );
 };

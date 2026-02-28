@@ -96,7 +96,7 @@ export const ConfirmButton = styled.button`
   border: 1px solid #ff4e37;
 
   background: ${({ theme }) => theme.PALLETE.white};
-  color: ${({ theme }) => theme.PALLETE.primary.mainblack};
+  color: ${({ theme }) => theme.PALLETE.mainblack};
 
   ${FONT_STYLE.PRETENDARD.H7_REGULAR};
   font-weight: ${({ theme }) => theme.FONT_WEIGHT.PRETENDARD.MEDIUM};
