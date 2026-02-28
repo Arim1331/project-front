@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Container, FullDivider, Page } from "../community/style";
 import { CommunityHeader } from "../../components/communitycomponents/CommunityHeader";
 import * as S from "./style";
@@ -7,6 +8,9 @@ import SortTab from "../../components/myrecipecomponents/SortTab";
 import Pagination from "../../components/layoutcomponents/pagination/Pagination";
 import FloatingActions from "../../components/layoutcomponents/FloatingActions";
 import MyRecipeEmpty from "../../components/myrecipecomponents/MyRecipeEmpty";
+import useAuthStore from "../../store/authStore";
+import LoginRequireModal from
+  "../../components/layoutcomponents/loginrequiremodal/LoginRequireModal";
 
 export const MYRECIPE_SORT_OPTIONS = [
   { key: "saved_latest", label: "최신순" },
@@ -186,11 +190,38 @@ const MOCK_SAVED_RECIPES = [
 ];
 
 const MyRecipe = () => {
-  const isLoggedIn = true; // 로그인 모달 테스트 보고 싶음 false
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuthStore();
+
+  const isLoggedIn = !!isAuthenticated && !!user; // 로그인 모달 띄우려면 저 조건
+
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+
+  const requireLogin = useCallback(
+    (action) => {
+      if (!isAuthenticated || !user) {
+        setLoginModalOpen(true);
+        return false;
+      }
+      action?.();
+      return true;
+    },
+    [isAuthenticated, user],
+  );
 
   const [keyword, setKeyword] = useState("");
   const [sortKey, setSortKey] = useState("saved_latest");
   const [savedList, setSavedList] = useState(MOCK_SAVED_RECIPES);
+
+  const handleCardClick = (recipeId) => {
+    const recipe = pagedItems.find((r) => r.id === recipeId);
+    if (!recipe) return;
+
+    // 상세(추천요리) 페이지로 이동 + state로 recipe 전달
+    navigate(`/foodrecommendation/recommendRecipe/${recipeId}`, {
+      state: { recipe },
+    });
+  };
 
   const [page, setPage] = useState(1);
   const pageSize = 12;
@@ -258,7 +289,9 @@ const MyRecipe = () => {
   }, [page]);
 
   const handleToggleBookmark = (recipeId) => {
-    setSavedList((prev) => prev.filter((r) => r.id !== recipeId));
+    requireLogin(() => {
+      setSavedList((prev) => prev.filter((r) => r.id !== recipeId));
+    });
   };
 
   return (
@@ -300,7 +333,7 @@ const MyRecipe = () => {
           <>
             <MyRecipeGrid
               items={pagedItems}
-              onCardClick={(id) => console.log("레시피 상세페이지로 이동", id)}
+              onCardClick={handleCardClick}
               onToggleBookmark={handleToggleBookmark}
             />
 
@@ -316,6 +349,15 @@ const MyRecipe = () => {
           </>
         )}
       </Container>
+
+      <LoginRequireModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onConfirm={() => {
+          setLoginModalOpen(false);
+          navigate("/login");
+        }}
+      />
 
       <FloatingActions targetId="community-top" />
     </Page>

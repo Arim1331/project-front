@@ -303,6 +303,44 @@ export const CarouselCard = styled.button`
   }
 `
 
+// ✅ 카드 이미지 + 배지 오버레이용 래퍼
+export const CardImageWrap = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+// ✅ 배지 컨테이너 (좌상단)
+export const BadgeWrap = styled.div`
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  gap: 6px;
+  z-index: 2;
+`;
+
+// ✅ NEW 배지
+export const BadgeNew = styled.span`
+  ${FONT_STYLE.PRETENDARD.H8_REGULAR};
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: ${({ theme }) => theme.PALLETE.primary.main};
+  color: ${({ theme }) => theme.PALLETE.white};
+  font-weight: 700;
+  white-space: nowrap;
+`;
+
+// ✅ 인기 배지
+export const BadgePopular = styled.span`
+  ${FONT_STYLE.PRETENDARD.H8_REGULAR};
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: ${({ theme }) => theme.PALLETE.secondary};
+  color: ${({ theme }) => theme.PALLETE.white};
+  font-weight: 700;
+  white-space: nowrap;
+`;
+
 // 이미지 영역 placeholder
 export const CardImageArea = styled.img`
   height: 161px;

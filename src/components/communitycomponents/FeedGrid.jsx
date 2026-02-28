@@ -1,4 +1,3 @@
-// src/components/communitycomponents/FeedGrid.jsx (복붙 전용)
 // ✅ items에서 받은 nickname/level을 Post로 변환해서 onCardClick(post)로 넘김
 import React, {
   useEffect,
@@ -12,12 +11,13 @@ import PostCard from "./PostCard";
 
 const PAGE_SIZE = 12;
 
-const FeedGrid = ({ items = [], onCardClick, meNickname }) => {
+const FeedGrid = ({ items = [], onCardClick, meNickname, onLikeToggle  }) => {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [isLoading, setIsLoading] = useState(false);
   const sentinelRef = useRef(null);
 
   const hasMore = visibleCount < items.length;
+
   const visibleItems = useMemo(
     () => items.slice(0, visibleCount),
     [items, visibleCount],
@@ -92,6 +92,7 @@ const FeedGrid = ({ items = [], onCardClick, meNickname }) => {
   //   [buildMockPost, onCardClick],
   // );
 
+  // 전체 items를 그대로 상위로 전달
   const handleCardClick = useCallback(
   (item) => {
     onCardClick?.(item);   // 그대로 전달
@@ -106,9 +107,11 @@ const FeedGrid = ({ items = [], onCardClick, meNickname }) => {
           <PostCard
             key={item.id}
             item={item}
+            allItems={items} // 인기 배지 계산용 (피드 전체 기준)
             w="100%"
             meNickname={meNickname}
             onClick={() => handleCardClick(item)}
+            onLikeToggle={onLikeToggle}
           />
         ))}
       </S.FeedGridWrap>

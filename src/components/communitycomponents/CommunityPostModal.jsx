@@ -17,12 +17,13 @@ const CommunityPostModal = ({
   open,
   onClose,
   post,
-  onClickDetail,
   onSubmitComment,
-
   meNickname, // "요리왕곰순"
   onEditComment, // (comment, nextText) => {}
   onDeleteComment, // (comment) => {}
+
+  requireLogin,
+  isAuthenticated,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [commentText, setCommentText] = useState("");
@@ -86,13 +87,19 @@ const CommunityPostModal = ({
   }, []);
 
   const handleSend = useCallback(() => {
+    // ✅ 로그인 필요
+    if (!isAuthenticated) {
+      requireLogin?.(() => {});
+      return;
+    }
+
     const text = commentText.trim();
     if (!text) return;
 
     onSubmitComment?.(text);
     setCommentText("");
     setIsCommentComposeOpen(false);
-  }, [commentText, onSubmitComment]);
+  }, [commentText, onSubmitComment, isAuthenticated, requireLogin]);
 
   // ✅ 수정 시작
   const startEdit = useCallback((key, c) => {
@@ -386,7 +393,9 @@ const CommunityPostModal = ({
                                   setMenuPos({ top, left });
 
                                   setOpenMenu((prev) =>
-                                    prev?.key === key ? null : { key, comment: c },
+                                    prev?.key === key
+                                      ? null
+                                      : { key, comment: c },
                                   );
                                 }}
                               >
@@ -449,7 +458,13 @@ const CommunityPostModal = ({
               <S.CommentComposer>
                 <S.Textarea
                   value={commentText}
-                  onFocus={() => setIsCommentComposeOpen(true)}
+                  onFocus={() => {
+                    if (!isAuthenticated) {
+                      requireLogin?.(() => {});
+                      return;
+                    }
+                    setIsCommentComposeOpen(true);
+                  }}
                   onChange={(e) => setCommentText(e.target.value.slice(0, 300))}
                   placeholder="댓글을 입력하세요(최대 300자)"
                 />
@@ -498,7 +513,8 @@ const CommunityPostModal = ({
       </S.Modal>
 
       {/* ✅ 포탈: 스크롤 영역 밖(document.body)으로 메뉴를 빼서 절대 안 잘리게 */}
-      {openMenu && menuPos &&
+      {openMenu &&
+        menuPos &&
         createPortal(
           <>
             <S.MenuOverlay
